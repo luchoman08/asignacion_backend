@@ -6,7 +6,7 @@ class TipoAsignacion(Enum):
     Contiene los tipos genericos de asignacion de historias que se puede elegir
     Atributes: 
         sencilla    asignacion con solo un valor que pondera una historias,
-            la asignacion se hará manteniendo un equilibrio en los puntos asignados,
+            la asignacion se hara manteniendo un equilibrio en los puntos asignados,
             se asume que todos los desarrolladores tienen la misma experiencia
         media   asignacion que asigna sin tener en cuenta equilibrio de puntos asignados
         compleja    asignacion basada en caracteristicas de desarrollador y de historias

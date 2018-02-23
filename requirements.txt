@@ -1,4 +1,11 @@
 Django==1.11
 django-rest-framework #3.7.3
-scipy
 numpy
+psycopg2
+statistics
+pulp
+
+
+spicy
+#CyLP
+#Cbc 2.9.9
