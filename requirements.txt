@@ -1,11 +1,9 @@
 Django==1.11
 django-rest-framework #3.7.3
-numpy
+django-role-permissions
+django-bootstrap-form
+django-bootstrap3
+django-rest-swagger
+
 psycopg2
-statistics
 pulp
-
-
-spicy
-#CyLP
-#Cbc 2.9.9

@@ -20,49 +20,20 @@ class ModeloAsignaciones:
     deberia tener para dar una respuesta optima
     
     Atributes:
-        desarrolladores     lista de desarrolladores de el proyecto,  con
-            puntuaciones especificas
-        historias           lista de historias a asignar, con puntuaciones especificas
-        tipoAsignacion  asignacion.TipoAsignacion
+        desarrolladores: dict  de desarrolladores de el proyecto,  con
+            horas disponibles para el sprint {'desarrolladorx': horas_disponibles}
+        historias: dict de historias a asignar, con puntuaciones especificas {'historiax': puntos}
+        relacion_puntos_horas: cantidad de horas estimadas que una historia tarda por cada punto 
+        tipoAsignacion:  asignacion.TipoAsignacion
     """
-    desarrolladores = []
-    historias = []
-    tipoAsignacion = TipoAsignacion.sencilla
-    totalPuntos = None
-    promedioPuntos = None
-    cantidadHistorias = None
-    cantidadDesarrolladores = None
     
-    def getPuntuacionesGenerales(self):
-        return [x.puntuacionGeneral for x in self.historias]
+
     
-    def getDesvEstPuntosGeneralesHistorias(self):
-        puntuaciones = self.getPuntuacionesGenerales()
-        return stats.pstdev(puntuaciones)
-        
-    def getMediaPuntosGeneralesHistorias(self):
-        puntuaciones = self.getPuntuacionesGenerales()
-        return stats.mean(puntuaciones)
-        
-    def iniciarTotalPuntos(self):
-        totalPuntos = 0
-        for historia in self.historias:
-            totalPuntos += historia.puntuacionGeneral
-        self.totalPuntos = totalPuntos
-    
-    def iniciarPromedioPuntos(self):
-        if (self.totalPuntos == None):
-            self.iniciarTotalPuntos()
-            self.promedioPuntos = self.totalPuntos / len(self.historias)
-        else:
-            self.promedioPuntos = self.totalPuntos / len(self.historias)
-    
-    def __init__(self, newDesarrolladores, newHistorias, newTipoAsignacion):
-        self.desarrolladores = newDesarrolladores
-        self.historias = newHistorias
-        self.tipo_asignacion = newTipoAsignacion
-        self.iniciarTotalPuntos()
-        self.iniciarPromedioPuntos()
+    def __init__(self, desarrolladores, historias, relacion_puntos_horas, tipo_asignacion):
+        self.desarrolladores = desarrolladores
+        self.historias = historias
+        self.tipo_asignacion = tipo_asignacion
+        self.relacion_puntos_horas = relacion_puntos_horas
         self.cantidadDesarrolladores = len(self.desarrolladores)
         self.cantidadHistorias = len (self.historias)
         

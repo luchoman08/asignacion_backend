@@ -1,0 +1,24 @@
+{% extends 'gestionUsuarios/base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+{% load bootstrap3 %}
+
+{%block content%}
+{%if adicion_exitosa%}
+
+{% trans "La aplicación se ha añadido con exito" as aplicacion_creada %}
+{% bootstrap_alert aplicacion_creada alert_type='success' %}
+
+{%endif%}
+<form  method="POST"  class="form" role="form" action="{% url 'adicionarApp' %}">            
+{% csrf_token %}
+{{ form|bootstrap }}
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="submit" class="btn btn-primary" value="{% trans "Ingresar" %}" />
+        </div>
+    </div>
+</form>
+{%endblock%}

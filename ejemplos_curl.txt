@@ -1,0 +1,46 @@
+Pull de historias:
+{"id_externo":1,"puntuacionGeneral":3}
+{"id_externo":2,"puntuacionGeneral":8}
+{"id_externo":3,"puntuacionGeneral":2}
+
+
+Pull de desarrolladores:
+
+{"id_externo":1,"horasDisponiblesSemana":10}
+{"id_externo":2,"horasDisponiblesSemana":10}
+
+Pull de atributos:
+
+{"id_externo": 1, "nombre": "UX", "descripcion": "Todo lo relacionado con user experience"}
+{"id_externo": 2, "nombre": "Backend", "descripcion": "Todo lo relacionado con desarrollo de aplicaciones del lado del servidor"}
+{"id_externo": 3, "nombre": "FrontEnd", "descripcion": "Todo lo relacionado con desarrollo de aplicaciones del lado de el cliente"}
+
+Pull de puntuaciones por atributo de historias:
+
+{"historia": 1, "atributo": 1, "puntuacion": 5}
+{"historia": 1, "atributo": 2, "puntuacion": 10}
+{"historia": 1, "atributo": 3, "puntuacion": 0}
+
+
+{"historia": 2, "atributo": 1, "puntuacion": 7}
+{"historia": 2, "atributo": 2, "puntuacion": 0}
+{"historia": 2, "atributo": 3, "puntuacion": 10}
+
+
+
+Pull de puntuaciones por atributo de desarrolladores:
+
+{"desarrollador": 1, "atributo": 1, "puntuacion": 5}
+{"desarrollador": 1, "atributo": 2, "puntuacion": 6}
+{"desarrollador": 1, "atributo": 3, "puntuacion": 5}
+
+{"desarrollador": 2, "atributo": 1, "puntuacion": 5}
+{"desarrollador": 2, "atributo": 2, "puntuacion": 5}
+{"desarrollador": 2, "atributo": 3, "puntuacion": 6}
+
+
+
+Pull de asignaciones simples
+curl -X PATCH --header "Content-Type: application/json" --header "Accept: application/json" -d '{"desarrolladores":[{"id_externo":1,"horasDisponiblesSemana":10},{"id_externo":2,"horasDisponiblesSemana":10}],"historias":[{"id_externo":1,"puntuacionGeneral":3},{"id_externo":2,"puntuacionGeneral":8},{"id_externo":3,"puntuacionGeneral":2}],"relacion_horas_puntos":1}' \
+  -H "Authorization: Token 52ad0b0639e328e3bbcd2d9e3ebdec28735ca975" \
+ "http://tesis-backend-luchoman.c9users.io/historiasUsuario/generarAsignacionSimple/"
