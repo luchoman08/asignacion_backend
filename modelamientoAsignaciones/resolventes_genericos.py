@@ -22,7 +22,7 @@ costo_caracteristica[1] = 5
 costo_caracteristica[2] = 10
 costo_caracteristica[3] = 0
 costo_caracteristica_ = {}
-costo_caracteristica_[1] = 7
+costo_caracteristica_[1] = 5
 costo_caracteristica_[2] = 0
 costo_caracteristica_[3] = 10
 tarea = Tarea (1, costo_caracteristica)
@@ -72,7 +72,7 @@ agentes = [agente, agente_]
 tareas = [tarea, tarea_]
 caracteristicas = [caracteristica, caracteristica_, caracteristica__]
 entorno = Entorno(agentes, tareas, caracteristicas)
-print(entorno.costos)
+
 def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas=False):
     """Resuelve el problema de la asignación garantizando un equilibrio en las cargas asignadas, añadiendo
     puntuacion de el agente en caracteristicas especificas y costos en las tareas .
@@ -92,6 +92,7 @@ def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_ta
 
 
     """
+    print(entorno.agentes[1].id, " ", entorno.agentes[1].habilidad_caracteristica)
     prob = pulp.LpProblem("Equilibrio de asignaciones", pulp.LpMinimize)
     variables_asignacion = pulp.LpVariable.dicts("Asignacion",entorno.agentesxtareas,None,None,pulp.LpBinary)
     
@@ -125,7 +126,7 @@ def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_ta
     print ('El tiempo total de el solve fue:', tiempo_solve) #En segundos 
     return prob.status,  prob.variables()   
 
-#resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas=True)
+resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas=True)
 
 
 

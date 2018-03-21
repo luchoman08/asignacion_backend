@@ -17,10 +17,21 @@ class DesarrolladorSimpleSerializador(serializers.ModelSerializer):
         model = Desarrollador
         fields = ['id_externo', 'horasDisponiblesSemana']
         
+class PuntuacionAtributoDesarrolladorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PuntuacionAtributoDesarrollador
+        fields = ('id', 'desarrollador','atributo','puntuacion')
+        
+class PuntuacionAtributoHistoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PuntuacionAtributoHistoria
+        fields = ('id', 'historia','atributo','puntuacion')
+           
 class DesarrolladorConAtributosSerializer(serializers.ModelSerializer):
+    puntuaciones_atributos = PuntuacionAtributoDesarrolladorSerializer(many = True, required = True)
     class Meta:
         model = DesarrolladorConAtributos
-        fields = ['id_externo']
+        fields = ['id_externo', 'puntuaciones_atributos']
 
 class ProyectoAgilSerializador(serializers.ModelSerializer):
     class Meta:
@@ -48,24 +59,16 @@ class AtributoSerializer(serializers.ModelSerializer):
         model = Atributo
         fields = ('id_externo', 'nombre')
 
-class PuntuacionAtributoDesarrolladorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PuntuacionAtributoDesarrollador
-        fields = ('id', 'desarrollador','atributo','puntuacion')
-        
-class PuntuacionAtributoHistoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PuntuacionAtributoHistoria
-        fields = ('id', 'historia','atributo','puntuacion')
-        
+     
 class AsignacionPorCaracteristicasSerializer(serializers.ModelSerializer):
     desarrolladores =  DesarrolladorSimpleSerializador(many=True, required = True)
     historias =  HistoriaSimpleSerializador(many=True, required = True)
+    atributos = AtributoSerializer(many=True, required = True)
     puntuaciones_atributo_historia = PuntuacionAtributoHistoriaSerializer(many = True, required = True)
     puntuaciones_atributo_desarrollador = PuntuacionAtributoDesarrolladorSerializer(many = True, required = True)
     class Meta:
         model = AsignacionPorCaracteristicas
-        fields = ('historias', 'desarrolladores', 'procurar_misma_cantidad_tareas' )
+        fields = ('historias', 'desarrolladores', 'atributos', 'procurar_misma_cantidad_tareas', 'puntuaciones_atributo_historia', 'puntuaciones_atributo_desarrollador' )
         
     def get_historias(self):
         historias = self.validated_data.get('historias')
@@ -79,7 +82,11 @@ class AsignacionPorCaracteristicasSerializer(serializers.ModelSerializer):
     def get_puntuaciones_atributo_desarrollador (self):
         puntuaciones_atributo_desarrollador = self.validated_data.get('puntuaciones_atributo_desarrollador')
         return [PuntuacionAtributoDesarrollador(**puntuacion_atributo_desarrollador) for puntuacion_atributo_desarrollador in puntuaciones_atributo_desarrollador]
-        
+    def get_procurar_misma_cantidad_tareas(self ):
+        return self.validated_data.get('procurar_misma_cantidad_tareas')
+    def get_atributos(self):
+        atributos = self.validated_data.get('atributos')
+        return [Atributo(**atributo) for atributo in atributos]
 """
 class HistoriaSimpleSerializador(serializers.Serializer):
     id = serializers.IntegerField(label = _('Id historia'), required = True)

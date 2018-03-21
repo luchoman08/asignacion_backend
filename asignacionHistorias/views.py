@@ -37,6 +37,28 @@ class AsignacionPorHorasView(generics.GenericAPIView):
             return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AsignacionPorCaractericasView(generics.GenericAPIView):
+    def get_serializer_class(self):
+        return AsignacionPorCaracteristicasSerializer
+    def get_queryset(self):
+        return AsignacionPorCaracteristicas.objects.all()
+    def patch(self, request, format=None):
+        """
+        Retornar una asignación simple basado en los datos de entrada
+        """
+        data=request.data
+        serializer = AsignacionPorCaracteristicasSerializer( data=request.data)
+       
+        if serializer.is_valid():
+            #serializer.save()
+            asignacion = AsignacionPorCaracteristicas(serializer.validated_data)
+            resultado_dict = fml.FabricaModeloPorAtributos(serializer.get_desarrolladores(), serializer.get_historias(), \
+            serializer.get_atributos(), \
+            serializer.get_puntuaciones_atributo_desarrollador(), serializer.get_puntuaciones_atributo_historia(), \
+            serializer.get_procurar_misma_cantidad_tareas()).solve()
+            return Response(resultado_dict)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class HistoriaSimpleCrear(generics.CreateAPIView):
     serializer_class = AsignacionPorHorasSerializer
 class ProyectoAgilListado(generics.ListCreateAPIView):

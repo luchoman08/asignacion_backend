@@ -12,7 +12,10 @@ schema_view = get_swagger_view(title='API asignación de historias')
 urlpatterns = [
     url(r'^$', schema_view, name = "swagger_api_view"),
     url(r'^', include(router.urls)),
+
     url(r'^generarAsignacionSimple/', views.AsignacionPorHorasView.as_view(),  name = 'generarAsignacionSimple'),
+    url(r'^generarAsignacionPorCaracteristicas/', views.AsignacionPorCaractericasView.as_view(),  name = 'generarAsignacionPorCaracteristicas'),
+    
     url(r'^proyectoAgil/', views.ProyectoAgilListado.as_view(), name = 'proyectoAgilListado'),
     url(r'^historiasConAtributos/(?P<pk>[0-9]+)/$', views.HistoriaConAtributosDetalle.as_view(), name = 'historiaDetalle'),
     url(r'^historiasConAtributos/', views.HistoriaConAtributosList.as_view(), name = 'historiaConAtributosListado'),
