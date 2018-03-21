@@ -1,0 +1,39 @@
+{% extends 'base_formularios_cortos.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+{% load bootstrap3 %}
+
+{% block titulo %}
+ <title>Sign In</title>
+{% endblock %}
+
+{% block tituloForm %}
+<h4 class="fw-300 c-grey-900 mB-40">{% trans "Iniciar Sesión" %}</h4>
+{%endblock%}
+
+{% block form %}
+
+<form  method="POST"  class="form" role="form" action="{% url 'signin' %}">            
+{% csrf_token %}
+{{ form|bootstrap }}
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="submit" class="btn btn-primary" value="{% trans "Ingresar" %}" />
+            <a role="button" href = " {% url 'signup' %} " class="btn btn-primary" >{% trans "Registrarse" %} </a>
+        </div>
+    </div>
+</form>
+
+{% trans "El nombre de usuario o la contraseña estan errados" as error_login %}
+{% if error %}
+    {% bootstrap_alert error_login alert_type='danger' %}
+{%endif%}
+
+{% trans "Se ha cerrado sesión correctamente" as error_login %}
+{% if desde_logout %}
+    {% bootstrap_alert error_login alert_type='success' %}
+{%endif%}
+
+{%endblock%}

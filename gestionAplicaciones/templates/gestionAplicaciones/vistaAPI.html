@@ -1,0 +1,10 @@
+{% extends 'gestionUsuarios/base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+{% load bootstrap3 %}
+
+{% block content %}
+<iframe frameborder="0"  src="{% url 'swagger_api_view' %}" ></iframe>
+{% endblock %}
