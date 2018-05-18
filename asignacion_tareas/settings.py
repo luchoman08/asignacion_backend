@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
 ]
-
+APPEND_SLASH = True
 CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
