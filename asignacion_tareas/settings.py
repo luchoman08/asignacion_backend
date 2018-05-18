@@ -54,11 +54,7 @@ INSTALLED_APPS = [
     
 ]
 
-CORS_ORIGIN_WHITELIST = (
-
-    'localhost:4200',
-    'tesis-backend-python-luchoman.c9users.io/'
-)
+CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
