@@ -1,9 +1,0 @@
-Django==1.11
-django-rest-framework
-django-role-permissions
-django-bootstrap-form
-django-bootstrap3
-django-rest-swagger
-django-cors-headers
-psycopg2
-pulp
