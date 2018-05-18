@@ -1,1 +1,1 @@
-web: gunicorn asignacion_backend.wsgi --log-file -
+web: gunicorn asignacion_tareas.wsgi --log-file -
