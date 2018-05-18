@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import ugettext as _
-from modelosGenericos import models as modelos_genericos
 # Create your models here.
 
 

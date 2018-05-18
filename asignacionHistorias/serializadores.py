@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext as _
-from modelosGenericos import models as modelos_genericos
 from .models import *
 class HistoriaConAtributosSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,12 +32,12 @@ class DesarrolladorConAtributosSerializer(serializers.ModelSerializer):
     class Meta:
         model = DesarrolladorConAtributos
         fields = ['id_externo', 'puntuaciones_atributos']
-
+"""
 class ProyectoAgilSerializador(serializers.ModelSerializer):
     class Meta:
         model = modelos_genericos.ProyectoAgil
         fields = ('nombre', 'fechaInicio', 'fechaFinalizacion', "correspondenciaPuntosHoras")
-
+"""
 class AsignacionResultantePorHorasSerializer(serializers.Serializer):
     desarrollador = DesarrolladorSimpleSerializador()
     historias = HistoriaSimpleSerializador( many = True )
