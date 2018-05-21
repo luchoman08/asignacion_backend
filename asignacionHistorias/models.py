@@ -18,7 +18,7 @@ class Agent(object):
         self.external_id = external_id
         self.capacity = capacity
     
-class AssignmentUnique(object):
+class AssignmentUniqueCost(object):
     def __init__(self, tasks=None, agents=None):
         self.tasks = tasks
         self.agents = agents
