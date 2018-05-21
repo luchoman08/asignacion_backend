@@ -17,8 +17,5 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^historiasUsuario/',  include('asignacionHistorias.urls'), name='historiasUsuarios'),
-    url(r'^gestionUsuarios/',  include('gestionUsuarios.urls'), name='gestoinUsuarios'),
-    url(r'^gestionAplicaciones/',  include('gestionAplicaciones.urls'), name='gestionAplicaciones'),
-]
+    url(r'^api/v1/', include('asignacionHistorias.urls'), name = "asignacionHistorias")
+    ]

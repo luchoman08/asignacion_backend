@@ -1,15 +1,18 @@
 Pull de historias:
 [
-{"id_externo":1,"puntuacionGeneral":3},
-{"id_externo":2,"puntuacionGeneral":8},
-{"id_externo":3,"puntuacionGeneral":2},
+{"id_externo":0,"puntuacionGeneral":8},
+{"id_externo":1,"puntuacionGeneral":13},
+{"id_externo":2,"puntuacionGeneral":21},
+{"id_externo":3,"puntuacionGeneral":34},
 ]
 
 Pull de desarrolladores:
 [
-{"id_externo":1,"horasDisponiblesSemana":10},
-{"id_externo":2,"horasDisponiblesSemana":10},
+{"id_externo":0,"horasDisponiblesSemana":40},
+{"id_externo":1,"horasDisponiblesSemana":35},
+{"id_externo":2,"horasDisponiblesSemana":30},
 ]
+
 Pull de atributos:
 [
 {"id_externo": 1, "nombre": "UX", "descripcion": "Todo lo relacionado con user experience"},
@@ -26,6 +29,56 @@ Pull de puntuaciones por atributo de historias:
 {"historia": 2, "atributo": 3, "puntuacion": 10},
 ]
 
+
+Pull de asignaciones simples:
+ 
+{
+"agents":
+    [
+    {"external_id":1,"capacity":10},
+    {"external_id":2,"capacity":10}
+    ],
+"tasks":
+    [
+    {"external_id":1,"cost":3},
+    {"external_id":2,"cost":8},
+    {"external_id":3,"cost":2}
+    ]}
+
+
+{
+	"desarrolladores": [{
+			"id_externo": 0,
+			"horasDisponiblesSemana": 40
+		},
+		{
+			"id_externo": 1,
+			"horasDisponiblesSemana": 35
+		},
+		{
+			"id_externo": 2,
+			"horasDisponiblesSemana": 30
+		}
+	],
+	"historias": [{
+			"id_externo": 0,
+			"puntuacionGeneral": 8
+		},
+		{
+			"id_externo": 1,
+			"puntuacionGeneral": 13
+		},
+		{
+			"id_externo": 2,
+			"puntuacionGeneral": 21
+		},
+		{
+			"id_externo": 3,
+			"puntuacionGeneral": 34
+		}
+	],
+	"relacion_horas_puntos": 1
+}
 
 
 Pull de puntuaciones por atributo de desarrolladores:
@@ -45,8 +98,8 @@ Pull de asignaciones con atributos:
 
 {
     "historias": [
-{"id_externo":2,"puntuacionGeneral":8},
-{"id_externo":3,"puntuacionGeneral":2}
+{"id_externo":1,"puntuacionGeneral":8},
+{"id_externo":2,"puntuacionGeneral":2}
 ],
     "desarrolladores": [
 {"id_externo":1,"horasDisponiblesSemana":10},
@@ -54,20 +107,20 @@ Pull de asignaciones con atributos:
 ],
     "procurar_misma_cantidad_tareas": true,
     "puntuaciones_atributo_historia": [
-{"historia": 3, "atributo": 1, "puntuacion": 5},
-{"historia": 3, "atributo": 2, "puntuacion": 0},
-{"historia": 3, "atributo": 3, "puntuacion": 10},
-{"historia": 2, "atributo": 1, "puntuacion": 5},
-{"historia": 2, "atributo": 2, "puntuacion": 10},
-{"historia": 2, "atributo": 3, "puntuacion": 0}
+{"historia": 1, "atributo": 1, "puntuacion": 0},
+{"historia": 1, "atributo": 2, "puntuacion": 10},
+{"historia": 1, "atributo": 3, "puntuacion": 0},
+{"historia": 2, "atributo": 1, "puntuacion": 0},
+{"historia": 2, "atributo": 2, "puntuacion": 0},
+{"historia": 2, "atributo": 3, "puntuacion": 10}
 ],
     "puntuaciones_atributo_desarrollador": [
-{"desarrollador": 1, "atributo": 1, "puntuacion": 5},
-{"desarrollador": 1, "atributo": 2, "puntuacion": 6},
-{"desarrollador": 1, "atributo": 3, "puntuacion": 5},
-{"desarrollador": 2, "atributo": 1, "puntuacion": 5},
-{"desarrollador": 2, "atributo": 2, "puntuacion": 5},
-{"desarrollador": 2, "atributo": 3, "puntuacion": 6}
+{"desarrollador": 1, "atributo": 1, "puntuacion": 1},
+{"desarrollador": 1, "atributo": 2, "puntuacion": 10},
+{"desarrollador": 1, "atributo": 3, "puntuacion": 10},
+{"desarrollador": 2, "atributo": 1, "puntuacion": 1},
+{"desarrollador": 2, "atributo": 2, "puntuacion": 10},
+{"desarrollador": 2, "atributo": 3, "puntuacion": 1}
 ],
 "atributos":
 [
@@ -77,6 +130,142 @@ Pull de asignaciones con atributos:
 ]
 }
 
+Pull de asignaciones con atributos y grupos relacionados de historias:
+
+
+    {
+      "grupos_historias": [
+        {
+          "id_externo": 0,
+          "id_historias": [
+            0,
+            1
+          ]
+        }
+      ],
+      "historias": [
+        {
+          "id_externo": 0,
+          "puntuacionGeneral": 8
+        },
+        {
+          "id_externo": 1,
+          "puntuacionGeneral": 2
+        },
+        {
+          "id_externo": 2,
+          "puntuacionGeneral": 10
+        }
+      ],
+      "desarrolladores": [
+        {
+          "id_externo": 1,
+          "horasDisponiblesSemana": 10
+        },
+        {
+          "id_externo": 2,
+          "horasDisponiblesSemana": 10
+        }
+      ],
+      "procurar_misma_cantidad_tareas": true,
+      "puntuaciones_atributo_historia": [
+        {
+          "historia": 0,
+          "atributo": 1,
+          "puntuacion": 0
+        },
+        {
+          "historia": 0,
+          "atributo": 2,
+          "puntuacion": 0
+        },
+        {
+          "historia": 0,
+          "atributo": 3,
+          "puntuacion": 10
+        },
+        {
+          "historia": 1,
+          "atributo": 1,
+          "puntuacion": 0
+        },
+        {
+          "historia": 1,
+          "atributo": 2,
+          "puntuacion": 0
+        },
+        {
+          "historia": 1,
+          "atributo": 3,
+          "puntuacion": 10
+        },
+        {
+          "historia": 2,
+          "atributo": 1,
+          "puntuacion": 0
+        },
+        {
+          "historia": 2,
+          "atributo": 2,
+          "puntuacion": 0
+        },
+        {
+          "historia": 2,
+          "atributo": 3,
+          "puntuacion": 10
+        }
+        
+      ],
+      "puntuaciones_atributo_desarrollador": [
+        {
+          "desarrollador": 1,
+          "atributo": 1,
+          "puntuacion": 1
+        },
+        {
+          "desarrollador": 1,
+          "atributo": 2,
+          "puntuacion": 1
+        },
+        {
+          "desarrollador": 1,
+          "atributo": 3,
+          "puntuacion": 10
+        },
+        {
+          "desarrollador": 2,
+          "atributo": 1,
+          "puntuacion": 1
+        },
+        {
+          "desarrollador": 2,
+          "atributo": 2,
+          "puntuacion": 10
+        },
+        {
+          "desarrollador": 2,
+          "atributo": 3,
+          "puntuacion": 1
+        }
+      ],
+      "atributos": [
+        {
+          "id_externo": 1,
+          "nombre": "UX",
+          "descripcion": "Todo lo relacionado con user experience"
+        },
+        {
+          "id_externo": 2,
+          "nombre": "Backend",
+          "descripcion": "Todo lo relacionado con desarrollo de aplicaciones del lado del servidor"
+        },
+        {
+          "id_externo": 3,
+          "nombre": "FrontEnd",
+          "descripcion": "Todo lo relacionado con desarrollo de aplicaciones del lado de el cliente"
+        }
+      ]
+    }
 
 
 Atributos
@@ -99,10 +288,12 @@ Atributos
 
 Pull de asignaciones simples
 
-curl -X PATCH --header "Content-Type: application/json" --header "Accept: application/json" -d '{"desarrolladores":[{"id_externo":1,"horasDisponiblesSemana":10},{"id_externo":2,"horasDisponiblesSemana":10}],"historias":[{"id_externo":1,"puntuacionGeneral":3},{"id_externo":2,"puntuacionGeneral":8},{"id_externo":3,"puntuacionGeneral":2}],"relacion_horas_puntos":1}' \
-  -H "Authorization: Token 52ad0b0639e328e3bbcd2d9e3ebdec28735ca975" \
+curl -X PATCH --header "Content-Type: application/json" --header "Accept: application/json" 
+  -d '{"desarrolladores":[{"id_externo":1,"horasDisponiblesSemana":10},{"id_externo":2,"horasDisponiblesSemana":10}],"historias":[{"id_externo":1,"puntuacionGeneral":3},{"id_externo":2,"puntuacionGeneral":8},{"id_externo":3,"puntuacionGeneral":2}],"relacion_horas_puntos":1}' \
+  -H "Authorization: Token f97dcbfa58c0be8ae1d9d23db04f98ba0ebe2d0" \
  "http://tesis-backend-luchoman.c9users.io/historiasUsuario/generarAsignacionSimple/"
  
+
 
 curl -X PATCH --header "Content-Type: application/json" --header "Accept: application/json" -d '{"desarrolladores":[{"id_externo":1,"horasDisponiblesSemana":10},{"id_externo":2,"horasDisponiblesSemana":10}],"historias":[{"id_externo":1,"puntuacionGeneral":3},{"id_externo":2,"puntuacionGeneral":8},{"id_externo":3,"puntuacionGeneral":2}],"relacion_horas_puntos":1}' \
   -H "Authorization: Token 52ad0b0639e328e3bbcd2d9e3ebdec28735ca975" \
