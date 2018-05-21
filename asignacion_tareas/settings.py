@@ -36,16 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'asignacionHistorias.apps.AsignacionHistoriasConfig',
-    'gestionUsuarios.apps.GestionusuariosConfig',
     'modelamientoAsignaciones.apps.ModelamientoasignacionesConfig',  
-    'api.apps.ApiConfig',
     'django.contrib.sessions',
     'rest_framework',
-    'corsheaders',
-    'rest_framework.authtoken',
-    'rest_framework_swagger',
-    'bootstrapform',
-    'bootstrap3',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
@@ -62,7 +55,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware'
 ]
@@ -145,27 +137,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "staticbase"), 
-]
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-SWAGGER_SETTINGS = {
 
-    'USE_SESSION_AUTH': True,
-    'DOC_EXPANSION': 'list',
-    'APIS_SORTER': 'alpha'
-}
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_ROOT, 'templates').replace('\\','/'),
-)

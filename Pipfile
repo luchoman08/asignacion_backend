@@ -16,8 +16,7 @@ django-cors-headers = "==2.2.0"
 djangorestframework-jwt = '*'
 psycopg2 = "==2.7.4"
 pulp = "==1.6.8"
-django = "==1.11.4"
-django-proxy = "*"
+django = "==1.11"
 
 [dev-packages]
 

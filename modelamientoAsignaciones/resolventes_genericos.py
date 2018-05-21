@@ -192,7 +192,9 @@ resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas
 
 
 
-def resolverProblemaEquilibrio(agente_capacidad, tarea_costo):
+def solveEquilibriumProblem(agente_capacidad, tarea_costo):
+    print(agente_capacidad)
+    print(tarea_costo)
     """Resuelve el problema de la asignación garantizando un equilibrio en las cargas asignadas.
 
     Se asignan las tareas de tal forma que se minimize la diferencia de cargas asignadas, en 
@@ -280,64 +282,3 @@ def resolverProblemaEquilibrio(agente_capacidad, tarea_costo):
     print ('El tiempo total de el solve fue:', tiempo_solve) #En segundos 
     return prob.status,  prob.variables()    
     
-
-
-def resolverProblemaEquilibrioConHabilidadesYGruposHistorias(entorno, procurar_misma_cantidad_tareas=False):
-    """Resuelve el problema de la asignacion garantizando un equilibrio en las cargas asignadas, adicionando
-    puntuacion de el agente en caracteristicas especificas y costos en las tareas .
-    
-    La escala de habilidades_caracteristica es del 0 al 10
-    La escala de costo_caracteristica es del 0 al 10
-    Se asignan las tareas de tal forma que se minimize la diferencia de cargas asignadas, en 
-    porcentaje con respecto al costo basado en que tanto le cuesta a cada agente hacer sus asignaciones,
-    dependiendo sus habilidades y el costo definido en distintos argumentos de la tarea
-
-    Args:
-        agentes (list of Agente): Agentes a asignar 
-        tareas (list of Tarea): Tareas a asignar
-    Returns:
-        (status, list): (Estado de el solver pulp, Lista de variables pulp con sus resultados)
-
-
-    """
-    prob = LpProblem("Equilibrio de asignaciones", LpMinimize)
-    variables_asignacion = LpVariable.dicts("Asignacion", entorno.agentesxtareas, None, None, LpBinary)
-    
-    #Bonus para cada desarrollador al hacer tareas del mismo grupo
-    
-     
-    
-    #Funcion objetivo
-
-    prob += lpSum (
-        lpSum([entorno.costos[agentextarea] * variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas]) +
-        [lpSum(entorno.costos_grupo[agentexrelacion_tareas]*(1 - lpSum([variables_asignacion[(agentexrelacion_tareas[0],id_tarea)] for id_tarea in entorno.relaciones_tareas_dict[agentexrelacion_tareas[1]]])) / len(entorno.relaciones_tareas_dict[agentexrelacion_tareas[1]])) for agentexrelacion_tareas in entorno.agentesxrelaciones_tareas]
-        )
-    #Una tarea solamente puede ser asignada a una persona:
-    
-    for tarea in entorno.tareas:
-    	prob += lpSum([variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas if agentextarea[1] == tarea.id]) == 1
-    
-    if procurar_misma_cantidad_tareas:
-        
-        minimas_tareas = math.floor(len(entorno.tareas) / len(entorno.agentes) )
-        print("------------------------")
-        print([minimas_tareas,len(entorno.tareas) / len(entorno.agentes) ])
-        for agente in entorno.agentes:
-            prob += lpSum([variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas if agentextarea[0] == agente.id]) >= minimas_tareas
-
-    prob.writeLP("EquilibrioConHabilidadesYGrupos.lp")
-    tiempo_solve_inicial = time() 
-    prob.solve()
-    tiempo_final_solve = time() 
-    
-    
-    tiempo_solve = tiempo_final_solve - tiempo_solve_inicial
-    
-    # The status of the solution is printed to the screen
-    print("Status:", LpStatus[prob.status])
-    
-    for v in prob.variables():
-        print(v.name, "=", v.varValue)
-    print ('El tiempo total de el solve fue:', tiempo_solve) #En segundos 
-    return prob.status,  prob.variables()   
