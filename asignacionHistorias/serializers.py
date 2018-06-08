@@ -3,15 +3,15 @@ from django.utils.translation import ugettext as _
 from .models import Task, Agent
 
 
-              
+
 class AgentSerializer(serializers.Serializer):
-    external_id = serializers.IntegerField(required = True)
+    external_id = serializers.CharField(required = True)
     capacity = serializers.IntegerField(required = True)
-     
+
 class TaskSerializer(serializers.Serializer):
-    external_id = serializers.IntegerField( required = True)
-    cost = serializers.IntegerField(required = True)
-           
+    external_id = serializers.CharField(required = True)
+    cost = serializers.FloatField(required = True)
+
 class AssignmentUniqueCostSerializer(serializers.Serializer):
     agents =  AgentSerializer(many=True, required = True)
     tasks =  TaskSerializer(many=True, required = True)

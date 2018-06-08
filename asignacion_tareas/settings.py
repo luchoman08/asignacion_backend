@@ -36,12 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'asignacionHistorias.apps.AsignacionHistoriasConfig',
-    'modelamientoAsignaciones.apps.ModelamientoasignacionesConfig',  
+    'modelamientoAsignaciones.apps.ModelamientoasignacionesConfig',
     'django.contrib.sessions',
     'rest_framework',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
 ]
 APPEND_SLASH = True
 CORS_ORIGIN_ALLOW_ALL = True
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware'
 ]
@@ -62,7 +62,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-       
+
     ),
     'DEFAULT_PERMISSION_CLASSES': (
        'rest_framework.permissions.IsAuthenticated',
