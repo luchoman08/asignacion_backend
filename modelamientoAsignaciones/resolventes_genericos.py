@@ -2,16 +2,7 @@ import itertools, string, re
 from pulp import *
 from time import time
 import math
-class Caracteristica:
-
-    def __init__(self, id, nombre):
-        self.id = id
-        self.nombre = nombre
-
-caracteristica = Caracteristica (1, 'frontend')
-caracteristica_ = Caracteristica (2, 'backend')
-caracteristica__ = Caracteristica (3, 'frontend')
-class Tarea:
+class Task:
 
     def __init__(self, id, costo_caracteristica ):
         self.id = id
@@ -25,10 +16,10 @@ costo_caracteristica_ = {}
 costo_caracteristica_[1] = 10
 costo_caracteristica_[2] = 0
 costo_caracteristica_[3] = 0
-tarea = Tarea (1, costo_caracteristica)
-tarea_ = Tarea (2, costo_caracteristica_)
+tarea = Task (1, costo_caracteristica)
+tarea_ = Task (2, costo_caracteristica_)
 
-class Agente:
+class Agent:
 
     def __init__(self, id, habilidad_caracteristica ):
         self.id = id
@@ -42,19 +33,18 @@ habilidad_caracteristica_ = {}
 habilidad_caracteristica_[1] = 1
 habilidad_caracteristica_[2] = 10
 habilidad_caracteristica_[3] = 1
-agente = Agente (1, habilidad_caracteristica)
-agente_ = Agente (2, habilidad_caracteristica_)
+agente = Agent (1, habilidad_caracteristica)
+agente_ = Agent (2, habilidad_caracteristica_)
 
 
-class Entorno:
+class Environment:
 
-    def __init__(self, agentes, tareas, caracteristicas):
-        self.agentes = agentes
-        self.tareas = tareas
-        self.caracteristicas = caracteristicas #dict
+    def __init__(self, agents, tasks):
+        self.agents = agents
+        self.tasks = tasks
         self.costos = {}
-        self.agentes_dict = {agente.id: agente for agente in agentes}
-        self.tareas_dict = {tarea.id: tarea for tarea in tareas}
+        self.agentes_dict = {agente.id: agente for agente in agents}
+        self.tareas_dict = {tarea.id: tarea for tarea in tasks}
         self.agentesxtareas = list(itertools.product(self.agentes_dict.keys(), self.tareas_dict.keys()))
         self.init_costos()
 
@@ -81,15 +71,15 @@ class GrupoIdsHistorias:
 
 class EntornoConGruposHistorias:
 
-    def __init__(self, agentes, tareas, grupo_tareas, caracteristicas):
-        self.agentes = agentes
+    def __init__(self, agents, tasks, grupo_tareas, caracteristicas):
+        self.agents = agents
         self.grupo_tareas = grupo_tareas
-        self.tareas = tareas
+        self.tasks = tasks
         self.caracteristicas = caracteristicas #dict
         self.costos = {}
         self.costos_grupo = {}
-        self.agentes_dict = {agente.id: agente for agente in agentes}
-        self.tareas_dict = {tarea.id: tarea for tarea in tareas}
+        self.agentes_dict = {agente.id: agente for agente in agents}
+        self.tareas_dict = {tarea.id: tarea for tarea in tasks}
         self.relaciones_tareas_dict  = {grupo_tarea['id_externo']: grupo_tarea['id_historias'] for grupo_tarea in self.grupo_tareas }
         self.agentesxtareas = list(itertools.product(self.agentes_dict.keys(), self.tareas_dict.keys()))
         self.agentesxrelaciones_tareas = list(itertools.product(self.agentes_dict.keys(), self.relaciones_tareas_dict.keys()))
@@ -119,30 +109,29 @@ class EntornoConGruposHistorias:
 
 
 
-agentes = [agente, agente_]
-tareas = [tarea, tarea_]
-caracteristicas = [caracteristica, caracteristica_, caracteristica__]
-entorno = Entorno(agentes, tareas, caracteristicas)
+agents = [agente, agente_]
+tasks = [tarea, tarea_]
+entorno = Environment(agents, tasks)
 
-def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas=False):
+def solveAttributesAssignmentProblem(entorno, procurar_misma_cantidad_tareas=False):
     """Resuelve el problema de la asignacion garantizando un equilibrio en las cargas asignadas, adicionando
-    puntuacion de el agente en caracteristicas especificas y costos en las tareas .
+    puntuacion de el agente en caracteristicas especificas y costos en las tasks .
 
     La escala de habilidades_caracteristica es del 0 al 10
     La escala de costo_caracteristica es del 0 al 10
-    Se asignan las tareas de tal forma que se minimize la diferencia de cargas asignadas, en
+    Se asignan las tasks de tal forma que se minimize la diferencia de cargas asignadas, en
     porcentaje con respecto al costo basado en que tanto le cuesta a cada agente hacer sus asignaciones,
     dependiendo sus habilidades y el costo definido en distintos argumentos de la tarea
 
     Args:
-        agentes (list of ´´Agente´´): Agentes a asignar
-        tareas (list of ´´Tarea´´): Tareas a asignar
+        agents (list of ´´Agente´´): Agentes a asignar
+        tasks (list of ´´Tarea´´): Tareas a asignar
     Returns:
         (status, list): (Estado de el solver pulp, Lista de variables pulp con sus resultados)
 
 
     """
-    print(entorno.agentes[1].id, " ", entorno.agentes[1].habilidad_caracteristica)
+    print(entorno.agents[1].id, " ", entorno.agents[1].habilidad_caracteristica)
     prob = LpProblem("Equilibrio de asignaciones", LpMinimize)
     variables_asignacion = LpVariable.dicts("Asignacion",entorno.agentesxtareas,None,None,LpBinary)
 
@@ -151,13 +140,13 @@ def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_ta
     prob += lpSum([entorno.costos[agentextarea] * variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas])
     #Una tarea solamente puede ser asignada a una persona:
 
-    for tarea in entorno.tareas:
+    for tarea in entorno.tasks:
     	prob += lpSum([variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas if agentextarea[1] == tarea.id]) == 1
 
     if procurar_misma_cantidad_tareas:
 
-        minimas_tareas = math.floor(len(entorno.tareas) / len(entorno.agentes) )
-        for agente in entorno.agentes:
+        minimas_tareas = math.floor(len(entorno.tasks) / len(entorno.agents) )
+        for agente in entorno.agents:
             prob += lpSum([variables_asignacion[agentextarea] for agentextarea in entorno.agentesxtareas if agentextarea[0] == agente.id]) >= minimas_tareas
 
     prob.writeLP("EquilibrioConHabilidades.lp")
@@ -176,7 +165,7 @@ def resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_ta
     print ('El tiempo total de el solve fue:', tiempo_solve) #En segundos
     return prob.status,  prob.variables()
 
-resolverProblemaEquilibrioConHabilidades(entorno, procurar_misma_cantidad_tareas=True)
+solveAttributesAssignmentProblem(entorno, procurar_misma_cantidad_tareas=True)
 
 
 
@@ -197,7 +186,7 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
     print(tarea_costo)
     """Resuelve el problema de la asignación garantizando un equilibrio en las cargas asignadas.
 
-    Se asignan las tareas de tal forma que se minimize la diferencia de cargas asignadas, en
+    Se asignan las tasks de tal forma que se minimize la diferencia de cargas asignadas, en
     porcentaje con respecto a la capacidad disponibles por cada agente
 
     Args:
@@ -209,59 +198,59 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
 
 
     """
-    agentes = agente_capacidad.keys()
-    tareas = tarea_costo.keys()
-    agentesxtareas = list(itertools.product(agente_capacidad.keys(), tarea_costo.keys())) # Lista de pares resultante de hacer producto cartesiano entre agentes y tareas
+    agents = agente_capacidad.keys()
+    tasks = tarea_costo.keys()
+    agentesxtareas = list(itertools.product(agente_capacidad.keys(), tarea_costo.keys())) # Lista de pares resultante de hacer producto cartesiano entre agents y tasks
     prob = LpProblem("Equilibrio de asignaciones", LpMinimize)
     variables_asignacion = LpVariable.dicts("Asignacion",agentesxtareas,None,None,LpBinary)
     #Variables auxiliares para ayudarse a resolver la desviacin estandard
-    aux_vars = LpVariable.dicts("Auxiliar", [(a, "temporal") for a in agentes], None, None)
+    aux_vars = LpVariable.dicts("Auxiliar", [(a, "temporal") for a in agents], None, None)
     #Funcion objetivo
 
 
 
-    def construir_funcion_objetivo(agentes):
+    def construir_funcion_objetivo(agents):
         return lpSum(aux_vars)
 
 
-    prob += construir_funcion_objetivo(agentes), "Minimizar desviacion estandard de el trabajo"
+    prob += construir_funcion_objetivo(agents), "Minimizar desviacion estandard de el trabajo"
 
     porcentaje_uso_tiempo_agentes = {}
     cargas_por_agente = {}
 
 
-    for agente in agentes:
+    for agente in agents:
     	cargas_por_agente[agente] = [tarea_costo [i[1]] * variables_asignacion[i] for i in agentesxtareas if i[0] == agente]
 
 
-    for agente in agentes:
+    for agente in agents:
     	porcentaje_uso_tiempo_agentes[agente] = lpSum([x * 100 / agente_capacidad[agente] for x in cargas_por_agente[agente] ])
 
     promedio_porcentaje_uso_tiempo_agentes_exepto_agente = {}
 
     porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes = {}
-    for agente in agentes:
-    	porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agente] =	porcentaje_uso_tiempo_agentes[agente] - porcentaje_uso_tiempo_agentes[agente]  / len(agentes)
+    for agente in agents:
+    	porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agente] =	porcentaje_uso_tiempo_agentes[agente] - porcentaje_uso_tiempo_agentes[agente]  / len(agents)
 
-    for agente in agentes:
+    for agente in agents:
     	promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agente] = \
     	(-lpSum([porcentaje_uso_tiempo_agentes[agentex] \
-    	for agentex in agentes if agentex != agente]) /  len(agentes)) + porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agente]
+    	for agentex in agents if agentex != agente]) /  len(agents)) + porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agente]
 
 
     #Restricciones
 
     #La suma de las horas asignadas no puede superar el mximo de horas disponibles
-    for agente in agentes:
+    for agente in agents:
     	prob +=  lpSum(cargas_por_agente[agente]) <= agente_capacidad[agente]
 
     #Una tarea solamente puede ser asignada a una persona:
 
-    for tarea in tareas:
+    for tarea in tasks:
     	prob+= lpSum([variables_asignacion[i] for i in agentesxtareas if i[1] == tarea]) == 1
 
     # Restricciones auxiliares debido la reduccion de valores absolutos de la desviacion standar
-    for agente in agentes:
+    for agente in agents:
         prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agente] <= aux_vars[(agente, 'temporal')]
         prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agente] >= - aux_vars[(agente, 'temporal')]
     #prob.writeLP("EquilibrioTrabajo.lp")

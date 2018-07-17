@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics
 from modelamientoAsignaciones import fabricaModelosLineales as fml
-from .serializers import AssignmentUniqueCostSerializer
+from .serializers import AssignmentUniqueCostSerializer, AssignmentWithAttributesSerializer
 from rest_framework.renderers import CoreJSONRenderer
 from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
@@ -21,16 +21,23 @@ class AssignmentUniqueCostView(APIView):
         data=request.data
         serializer = AssignmentUniqueCostSerializer( data=request.data)
         if serializer.is_valid():
-            #serializer.save()
-            print(serializer.get_agents())
             resultado_dict = fml.BalancedModelFactory(serializer.get_agents(), serializer.get_tasks()).solve()
-            print("hola")
-            print (resultado_dict)
             return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+class AssignmentWithAttributesView(APIView):
+    permission_classes = (AllowAny, )
+    @action(methods=['POST'], detail=True) 
+    def post(self, request, format=None):
+        """
+        Return task assignment based in a unique cost input
+        """
+        data=request.data
+        serializer = AssignmentWithAttributesSerializer( data=request.data)
+        if serializer.is_valid():
+            #resultado_dict = fml.BalancedModelFactory(serializer.get_agents(), serializer.get_tasks()).solve()
+            return Response(data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

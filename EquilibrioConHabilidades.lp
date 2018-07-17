@@ -1,69 +1,15 @@
 \* Equilibrio de asignaciones *\
 Minimize
-OBJ: Auxiliar_('788273',_'temporal') + Auxiliar_('796550',_'temporal')
- + Auxiliar_('796556',_'temporal')
+OBJ: 100 Asignacion_(1,_1) + 10 Asignacion_(1,_2) + 10 Asignacion_(2,_1)
+ + 100 Asignacion_(2,_2)
 Subject To
-_C1: 13 Asignacion_('796550',_'2239865') + 40 Asignacion_('796550',_'2252677')
- <= 26
-_C10: 433.333333333 Asignacion_('788273',_'2239865')
- + 1333.33333333 Asignacion_('788273',_'2252677')
- - 16.6666666667 Asignacion_('796550',_'2239865')
- - 51.2820512821 Asignacion_('796550',_'2252677')
- - 5.41666666667 Asignacion_('796556',_'2239865')
- - 16.6666666667 Asignacion_('796556',_'2252677')
- - Auxiliar_('788273',_'temporal') <= 0
-_C11: 433.333333333 Asignacion_('788273',_'2239865')
- + 1333.33333333 Asignacion_('788273',_'2252677')
- - 16.6666666667 Asignacion_('796550',_'2239865')
- - 51.2820512821 Asignacion_('796550',_'2252677')
- - 5.41666666667 Asignacion_('796556',_'2239865')
- - 16.6666666667 Asignacion_('796556',_'2252677')
- + Auxiliar_('788273',_'temporal') >= 0
-_C2: 13 Asignacion_('796556',_'2239865') + 40 Asignacion_('796556',_'2252677')
- <= 80
-_C3: 13 Asignacion_('788273',_'2239865') + 40 Asignacion_('788273',_'2252677')
- <= 2
-_C4: Asignacion_('788273',_'2239865') + Asignacion_('796550',_'2239865')
- + Asignacion_('796556',_'2239865') = 1
-_C5: Asignacion_('788273',_'2252677') + Asignacion_('796550',_'2252677')
- + Asignacion_('796556',_'2252677') = 1
-_C6: - 216.666666667 Asignacion_('788273',_'2239865')
- - 666.666666667 Asignacion_('788273',_'2252677')
- + 33.3333333333 Asignacion_('796550',_'2239865')
- + 102.564102564 Asignacion_('796550',_'2252677')
- - 5.41666666667 Asignacion_('796556',_'2239865')
- - 16.6666666667 Asignacion_('796556',_'2252677')
- - Auxiliar_('796550',_'temporal') <= 0
-_C7: - 216.666666667 Asignacion_('788273',_'2239865')
- - 666.666666667 Asignacion_('788273',_'2252677')
- + 33.3333333333 Asignacion_('796550',_'2239865')
- + 102.564102564 Asignacion_('796550',_'2252677')
- - 5.41666666667 Asignacion_('796556',_'2239865')
- - 16.6666666667 Asignacion_('796556',_'2252677')
- + Auxiliar_('796550',_'temporal') >= 0
-_C8: - 216.666666667 Asignacion_('788273',_'2239865')
- - 666.666666667 Asignacion_('788273',_'2252677')
- - 16.6666666667 Asignacion_('796550',_'2239865')
- - 51.2820512821 Asignacion_('796550',_'2252677')
- + 10.8333333333 Asignacion_('796556',_'2239865')
- + 33.3333333333 Asignacion_('796556',_'2252677')
- - Auxiliar_('796556',_'temporal') <= 0
-_C9: - 216.666666667 Asignacion_('788273',_'2239865')
- - 666.666666667 Asignacion_('788273',_'2252677')
- - 16.6666666667 Asignacion_('796550',_'2239865')
- - 51.2820512821 Asignacion_('796550',_'2252677')
- + 10.8333333333 Asignacion_('796556',_'2239865')
- + 33.3333333333 Asignacion_('796556',_'2252677')
- + Auxiliar_('796556',_'temporal') >= 0
-Bounds
-Auxiliar_('788273',_'temporal') free
-Auxiliar_('796550',_'temporal') free
-Auxiliar_('796556',_'temporal') free
+_C1: Asignacion_(1,_1) + Asignacion_(2,_1) = 1
+_C2: Asignacion_(1,_2) + Asignacion_(2,_2) = 1
+_C3: Asignacion_(1,_1) + Asignacion_(1,_2) >= 1
+_C4: Asignacion_(2,_1) + Asignacion_(2,_2) >= 1
 Binaries
-Asignacion_('788273',_'2239865')
-Asignacion_('788273',_'2252677')
-Asignacion_('796550',_'2239865')
-Asignacion_('796550',_'2252677')
-Asignacion_('796556',_'2239865')
-Asignacion_('796556',_'2252677')
+Asignacion_(1,_1)
+Asignacion_(1,_2)
+Asignacion_(2,_1)
+Asignacion_(2,_2)
 End
