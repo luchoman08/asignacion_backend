@@ -26,12 +26,12 @@ class BalancedModelFactory:
         """Solve and returns the result by linear solver of task assignments
         
         Returns:
-            [dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
+            [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
         """
 
         pulp_status, pulp_variables = resol_genericos.solveEquilibriumProblem(self.agents_capacities, self.tasks_costs)
         assignments = {int(agent):[] for agent in self.agents_capacities.keys()}
-        
+        result = {}
         for variable in pulp_variables:
             numbers_in_var_name = re.findall(r'\d+', variable.name)
             if (len(numbers_in_var_name) == 2 and variable.varValue == 1):
@@ -39,44 +39,44 @@ class BalancedModelFactory:
                 task = int(numbers_in_var_name[1])
                 assignments[agent].append(task)
         print(assignments)
-        return assignments
+        result['assignments'] = assignments
+        return result
 
 class AttributeBasedModelFactory:
     """
-    Fabrica de modelos donde se tienen en cuenta las habilidades de cada desarrollador (agente ) y
-    los costos de cada historia (tarea) medidos por caracteristicas, podiendo mantener un equilibrio
+    Fabrica de modelos donde se tienen en cuenta las habilidades de cada desarrollador (agent ) y
+    los costos de cada historia (task) medidos por caracteristicas, podiendo mantener un equilibrio
     entre cantidad de historias asignadas o bien un minimo de historias asignadas a cada desarrollador
     """ 
-    
-
     def __init__(self, agents, tasks, assign_same_quantity_of_tasks):
         """[summary]
         
         Arguments:
-            agents {[list of deserialized Agents]} -- [See AgentWithAttributesSerializer]
-            tasks {[type]} -- [description]
+            agents {[list of Agents]} -- [See AgentWithAttributesSerializer]
+            tasks {[list of Tasks]} -- [See TaskWithAttributesSerializer]
             assign_same_quantity_of_tasks {[boolean]} -- [Say to solver y should include information to intent balance the number of task assigned]
         """
-
-        #self.puntuacion_atributos_tarea = puntuacion_atributos_tarea
-        #self.puntuacion_atributos_agente = puntuacion_atributos_agente
-        #puntuacion_atributos_agente_dict = self.getpuntuacion_atributos_agente_dict(agents)
-        #puntuacion_atributos_tarea_dict = self.getpuntuacion_atributos_tarea_dict(tasks)
-        self.agents = [resol_genericos.Agente(agente.id_externo, puntuacion_atributos_agente_dict[agente.id_externo]) for agente in agents]
-        self.tasks = [resol_genericos.Tarea(tarea.id_externo, puntuacion_atributos_tarea_dict[tarea.id_externo]) for tarea in tasks]
-        self.caracteristicas = caracteristicas
+        print(agents[0].attributes_punctuation)
+        self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
+        self.tasks = [resol_genericos.Task(task.external_id, {attribute.external_id: attribute.punctuation for attribute in task.attributes_punctuation}) for task in tasks]
         self.assign_same_quantity_of_tasks = assign_same_quantity_of_tasks
-        self.entorno = resol_genericos.Entorno(self.agents, self.tasks, self.caracteristicas)       
+        self.environment = resol_genericos.Environment(self.agents, self.tasks)  
+
     def solve(self):
+        """Solve and returns the result by linear solver of task assignments with attributes
         
-        pulp_status, pulp_variables = resol_genericos.resolverProblemaEquilibrioConHabilidades(self.entorno, assign_same_quantity_of_tasks = self.assign_same_quantity_of_tasks  )
-        asignaciones_resultado = {int(agente.id):[] for agente in self.agents}
-        
+        Returns:
+            [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
+        """      
+        pulp_status, pulp_variables = resol_genericos.solveAttributesAssignmentProblem(self.environment, assign_same_quantity_of_tasks = self.assign_same_quantity_of_tasks  )
+        asignaciones_resultado = {int(agent.id):[] for agent in self.agents}
+        result = {}
         for variable in pulp_variables:
             numeros_en_nombre_variable = re.findall(r'\d+', variable.name)
             if (len(numeros_en_nombre_variable) == 2 and variable.varValue == 1):
-                agente = int(numeros_en_nombre_variable[0])
-                tarea = int(numeros_en_nombre_variable[1])
-                asignaciones_resultado[agente].append(tarea)
+                agent = int(numeros_en_nombre_variable[0])
+                task = int(numeros_en_nombre_variable[1])
+                asignaciones_resultado[agent].append(task)
         print(asignaciones_resultado)
-        return asignaciones_resultado
+        result['assignments'] = asignaciones_resultado
+        return result

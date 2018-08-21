@@ -34,9 +34,11 @@ class AssignmentWithAttributesView(APIView):
         """
         data=request.data
         serializer = AssignmentWithAttributesSerializer( data=request.data)
+        
         if serializer.is_valid():
-            #resultado_dict = fml.BalancedModelFactory(serializer.get_agents(), serializer.get_tasks()).solve()
-            return Response(data)
+            print(serializer.data)
+            resultado_dict = fml.AttributeBasedModelFactory(serializer.get_agents(), serializer.get_tasks(), serializer.get_assign_same_quantity_of_tasks()).solve()
+            return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

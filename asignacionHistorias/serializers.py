@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext as _
-from .models import Task, Agent
+from .models import Task, Agent, AgentWithAttributes, TaskWithAttributes
 """
 Atributes
 """
@@ -15,20 +15,20 @@ class AtributoSerializer(serializers.Serializer):
 """
 Puntuation 
 """
-class PuntuacionAtributoSerializer(serializers.Serializer):
-    id_atributo = serializers.IntegerField(required = True)
-    puntuacion = serializers.IntegerField(required = True)
+class AtributePunctuation(serializers.Serializer):
+    external_id = serializers.IntegerField(required = True)
+    punctuation = serializers.FloatField(required = True)
 
 """
 Agents 
 """
 class AgentSerializer(serializers.Serializer):
     external_id = serializers.CharField(required = True)
-    capacity = serializers.IntegerField(required = True)
+    capacity = serializers.FloatField(required = True)
 
 class AgentWithAttributesSerializer(serializers.Serializer):
     external_id = serializers.CharField(required = True)
-    puntuaciones_atributos = PuntuacionAtributoSerializer(many=True, required = True)
+    attributes_punctuation = AtributePunctuation(many=True, required = True)
 """
 Tasks
 """
@@ -39,7 +39,7 @@ class TaskSerializer(serializers.Serializer):
 
 class TaskWithAtributesSerializer(serializers.Serializer):
     external_id = serializers.CharField(required = True)
-    puntuaciones_atributos = PuntuacionAtributoSerializer(many=True, required = True)
+    attributes_punctuation = AtributePunctuation(many=True, required = True)
 
 """
 Assignments input
@@ -64,9 +64,12 @@ class AssignmentWithAttributesSerializer(serializers.Serializer):
     """
     agents =  AgentWithAttributesSerializer(many=True, required = True)
     tasks =  TaskWithAtributesSerializer(many=True, required = True)
+    assign_same_quantity_of_tasks = serializers.BooleanField(required = True)
+    def get_assign_same_quantity_of_tasks(self):
+        return self.validated_data.get('assign_same_quantity_of_tasks')
     def get_tasks(self):
         tasks = self.validated_data.get('tasks')
-        return [Task(**task) for task in tasks ]
+        return [TaskWithAttributes(**task) for task in tasks ]
     def get_agents(self):
         agents = self.validated_data.get('agents')
-        return [Agent(**agent) for agent in agents ]
+        return [AgentWithAttributes(**agent) for agent in agents ]
