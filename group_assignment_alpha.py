@@ -2,93 +2,89 @@ import itertools, string, re
 from pulp import *
 from time import time
 import math
-agente_horas = {}
-agente_horas[0] = 10
-agente_horas[1] = 10
-M = 30000000000
-tarea_costo = {}
-tarea_costo[0] = 5
-tarea_costo[1] = 2
-tarea_costo[2] = 2
-tarea_costo[3] = 5
-grupos = {}
-grupos[0]=[0,3]
-grupos[1]=[2,1]
-def resolverProblemaEquilibrio(agente_horas, tarea_costo, grupos, assign_same_quantity_of_tasks = False ):
-    agentes = agente_horas.keys()
-    tareas = tarea_costo.keys()
-    _grupos = grupos.keys()
-    agentesxtareas = list(itertools.product(agente_horas.keys(), tarea_costo.keys())) # Lista de pares resultante de hacer producto cartesiano entre agentes y tareas 
-    tareas_en_grupos = list(itertools.chain.from_iterable(grupos.values()))
-    agentesxtareas_en_grupos = list(itertools.product(agente_horas.keys(), tareas_en_grupos)) # Lista de pares resultante de hacer producto cartesiano entre agentes y tareas 
-    agentesxgrupos = list(itertools.product(agente_horas.keys(), grupos.keys())) # Lista de pares resultante de hacer producto cartesiano entre agentes y tareas 
-    prob = pulp.LpProblem("Asignaciones por agrupamiento", pulp.LpMinimize) 
-    variables_asignacion = pulp.LpVariable.dicts("Asignacion",agentesxtareas,None,None,pulp.LpBinary)
-    #Variables auxiliares para ayudarse a resolver la desviacin estandard
-    aux_vars = pulp.LpVariable.dicts("Auxiliar",  agentesxtareas_en_grupos, None, None)
+agent_capacity = {}
+agent_capacity[0] = 10
+agent_capacity[1] = 10
+task_cost = {}
+task_cost[0] = 5
+task_cost[1] = 2
+task_cost[2] = 2
+task_cost[3] = 5
+groups = {}
+groups[0]=[0,3]
+groups[1]=[2,1]
+def solveTaskGroupingAssignment(agent_capacity, task_cost, groups, assign_same_quantity_of_tasks = False ):
+    """Maximize the allocation so that each agent has assigned stories highly related to each other with respect to their groups.
+    Args:
+        agent_capacity: {id_agent: capacity}
+        task_cost: {id_task: cost}
+        groups: {id_group: array of task ids}
+    Returns:
+        (status_problem: pulp problem status,  vars: pulp variables)
+    """
+    agents = agent_capacity.keys()
+    tasks = task_cost.keys()
+    _groups = groups.keys()
+    agentsxtasks = list(itertools.product(agent_capacity.keys(), task_cost.keys())) # Lista de pares resultante de hacer producto cartesiano entre agents y tasks 
+    tasks_en_groups = list(itertools.chain.from_iterable(groups.values()))
+    agentsxtasks_in_groups = list(itertools.product(agent_capacity.keys(), tasks_en_groups)) # Lista de pares resultante de hacer producto cartesiano entre agents y tasks 
+    agentsxgroups = list(itertools.product(agent_capacity.keys(), groups.keys())) # Lista de pares resultante de hacer producto cartesiano entre agents y tasks 
+    prob = pulp.LpProblem("Task grouping assignment ", pulp.LpMinimize) 
+    assignment_vars = pulp.LpVariable.dicts("Assignment",agentsxtasks,None,None,pulp.LpBinary)
+    #Variables Auxes para ayudarse a resolver la desviacin estandard
+    aux_vars = pulp.LpVariable.dicts("Aux",  agentsxtasks_in_groups, None, None)
     #Funcion objetivo
     
+    assignment_agente_in_each_group = {} # (idagente, idgrupo): lpSum(tasks_del_grupo_idgrupo_al_agente_idagente
 
-    
-    asignacion_agente_en_cada_grupo = {} # (idagente, idgrupo): lpSum(tareas_del_grupo_idgrupo_al_agente_idagente
-
-    # Tareas asignadas al agente por grupo
-    for agente in agentes:
-		for grupo in _grupos:
-			asignacion_agente_en_cada_grupo[(agente, grupo)] = pulp.lpSum([variables_asignacion[x] for x in agentesxtareas if x[0] == agente and x[1] in grupos[grupo]  ])
+    # tasks asignadas al agente por grupo
+    for agente in agents:
+		for grupo in _groups:
+			assignment_agente_in_each_group[(agente, grupo)] = pulp.lpSum([assignment_vars[x] for x in agentsxtasks if x[0] == agente and x[1] in groups[grupo]  ])
 	
-	# Retorna la desviacion standard de las asignaciones a un grupo determinado
+	# Retorna la desviacion standard de las Assignmentes a un grupo determinado
 
-    #print (asignacion_agente_en_cada_grupo[(1,0)])
-    promedio_asignacion_agente_en_cada_grupo = {}		
-    for agente in agentes:
-        for grupo in _grupos:
-                promedio_asignacion_agente_en_cada_grupo[(agente, grupo)] = pulp.lpSum(asignacion_agente_en_cada_grupo[(agente, grupo)]) / float(len (grupos[grupo]))
-    asignacion_historia_a_agente_menos_promedio_grupo = {}
-    for agente in agentes:
-		for grupo in _grupos:
-		    for tarea in grupos[grupo]:
-		        asignacion_historia_a_agente_menos_promedio_grupo[(agente, tarea)] = variables_asignacion[(agente, tarea)] - promedio_asignacion_agente_en_cada_grupo[(agente, grupo)]
+    #print (assignment_agente_in_each_group[(1,0)])
+    assignment_agent_in_each_group_average = {}		
+    for agente in agents:
+        for grupo in _groups:
+                assignment_agent_in_each_group_average[(agente, grupo)] = pulp.lpSum(assignment_agente_in_each_group[(agente, grupo)]) / float(len (groups[grupo]))
+    assigned_tasks_to_agent_less_group_average = {}
+    for agente in agents:
+		for grupo in _groups:
+		    for task in groups[grupo]:
+		        assigned_tasks_to_agent_less_group_average[(agente, task)] = assignment_vars[(agente, task)] - assignment_agent_in_each_group_average[(agente, grupo)]
     def construir_desviacion_standard(agente, grupo):
-		return pulp.lpSum([aux_vars[(agente,tarea)] for tarea in grupos[grupo]]) / (len (grupos[grupo]) -1.0)
+		return pulp.lpSum([aux_vars[(agente,task)] for task in groups[grupo]]) / (len (groups[grupo]) -1.0)
 	    
     def construir_funcion_objetivo():
-        return pulp.lpSum([construir_desviacion_standard(agentexgrupo[0], agentexgrupo[1]) for agentexgrupo in agentesxgrupos])
+        return pulp.lpSum([construir_desviacion_standard(agentexgrupo[0], agentexgrupo[1]) for agentexgrupo in agentsxgroups])
     #Restricciones
-    cargas_por_agente = {}
+    assignments_by_agent = {}
 
 
-    for agente in agentes:
-    	cargas_por_agente[agente] = [tarea_costo [i[1]] * variables_asignacion[i] for i in agentesxtareas if i[0] == agente]
+    for agente in agents:
+    	assignments_by_agent[agente] = [task_cost [i[1]] * assignment_vars[i] for i in agentsxtasks if i[0] == agente]
 
     #La suma de las horas asignadas no puede superar el mximo de horas disponibles
-    for agente in agentes:
-    	prob +=  lpSum(cargas_por_agente[agente]) <= agente_horas[agente]    
-    prob += construir_funcion_objetivo(), "Minimizar desviacion estandard en la asignaciin de grupos"		    
-    #correspondencia valores absulutos y sus respectivas variables auxiliares desvesat v1
-    for agente in agentes:
-		for tarea in tareas_en_grupos:
-			prob+= asignacion_historia_a_agente_menos_promedio_grupo[(agente, tarea)]   <= aux_vars[(agente,tarea)]
-			prob+= -asignacion_historia_a_agente_menos_promedio_grupo[(agente, tarea)] <= aux_vars[(agente,tarea)]
+    for agente in agents:
+    	prob +=  lpSum(assignments_by_agent[agente]) <= agent_capacity[agente]    
+    prob += construir_funcion_objetivo(), "Minimizar desviacion estandard en la asignaciin de groups"		    
+    # Correspondencia valores absulutos y sus respectivas variables auxiliares
+    for agente in agents:
+		for task in tasks_en_groups:
+			prob+= assigned_tasks_to_agent_less_group_average[(agente, task)]   <= aux_vars[(agente,task)]
+			prob+= -assigned_tasks_to_agent_less_group_average[(agente, task)] <= aux_vars[(agente,task)]
 
-    #Una tarea solamente puede ser asignada a una persona:
+    #Una task solamente puede ser asignada a una persona:
     
-    for tarea in tareas:
-    	prob+= pulp.lpSum([variables_asignacion[i] for i in agentesxtareas if i[1] == tarea]) == 1
+    for task in tasks:
+    	prob+= pulp.lpSum([assignment_vars[i] for i in agentsxtasks if i[1] == task]) == 1
     	
-    
-    #for agente in agentes:
-    #    prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agente] <= aux_vars[(agente, 'temporal')]
-    #    prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agente] >= - aux_vars[(agente, 'temporal')]
-    
-
-    prob.writeLP("EquilibrioTrabajo.lp")
     
     tiempo_solve_inicial = time() 
     prob.solve()
     tiempo_final_solve = time() 
-    
-    
     tiempo_solve = tiempo_final_solve - tiempo_solve_inicial
     
     # The status of the solution is printed to the screen
@@ -100,4 +96,4 @@ def resolverProblemaEquilibrio(agente_horas, tarea_costo, grupos, assign_same_qu
     
     
     print ('El tiempo total de el solve fue:', tiempo_solve) #En segundos 
-resolverProblemaEquilibrio(agente_horas, tarea_costo, grupos, True)
+solveTaskGroupingAssignment(agent_capacity, task_cost, groups, True)
