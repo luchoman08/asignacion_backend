@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics
 from modelamientoAsignaciones import fabricaModelosLineales as fml
-from .serializers import AssignmentUniqueCostSerializer, AssignmentWithAttributesSerializer
+from .serializers import AssignmentUniqueCostSerializer, AssignmentWithAttributesSerializer, AssignmentWithGroupsSerializer
 from rest_framework.renderers import CoreJSONRenderer
 from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
@@ -33,7 +33,7 @@ class AssignmentWithAttributesView(APIView):
         Return task assignment based in a unique cost input
         """
         data=request.data
-        serializer = AssignmentWithAttributesSerializer( data=request.data)
+        serializer = AssignmentWithAttributesSerializer( data=data)
         
         if serializer.is_valid():
             print(serializer.data)
@@ -41,8 +41,19 @@ class AssignmentWithAttributesView(APIView):
             return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+class AssignmentWithGroupsView(APIView):
+    permission_classes= (AllowAny, )
+    @action(methods=['POST'], detail=True) 
+    def post(self, request, format=None):
+        """
+        Return task assignment based in a unique cost input and groups of tasks
+        """
+        data = request.data
+        serializer = AssignmentWithGroupsSerializer(data=data)
+        if serializer.is_valid():
+            resultado_dict = fml.TaskGroupModelFactory(serializer.get_agents(),  serializer.get_tasks(), serializer.get_groups()).solve()
+            return Response(resultado_dict)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

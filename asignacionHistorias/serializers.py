@@ -1,22 +1,15 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext as _
-from .models import Task, Agent, AgentWithAttributes, TaskWithAttributes
-"""
-Atributes
-"""
+from .models import Task, Agent, AgentWithAttributes, TaskWithAttributes, TaskGroup
 
-class AtributoSerializer(serializers.Serializer):
-    """
-    Atributo o cualidad medible en un ente
-    """
-    id_externo = serializers.IntegerField(required=True)
-    nombre = serializers.CharField(required = True)
+
+
 
 """
-Puntuation 
+Punctuation 
 """
 class AtributePunctuation(serializers.Serializer):
-    external_id = serializers.IntegerField(required = True)
+    external_id = serializers.CharField(required = True) # External id of attribute
     punctuation = serializers.FloatField(required = True)
 
 """
@@ -40,6 +33,10 @@ class TaskSerializer(serializers.Serializer):
 class TaskWithAtributesSerializer(serializers.Serializer):
     external_id = serializers.CharField(required = True)
     attributes_punctuation = AtributePunctuation(many=True, required = True)
+
+class TaskGroupSerializer(serializers.Serializer):
+    external_id = serializers.CharField(required = True)
+    task_ids = serializers.ListField(child=serializers.CharField(required = True), required=True)
 
 """
 Assignments input
@@ -73,3 +70,22 @@ class AssignmentWithAttributesSerializer(serializers.Serializer):
     def get_agents(self):
         agents = self.validated_data.get('agents')
         return [AgentWithAttributes(**agent) for agent in agents ]
+class AssignmentWithGroupsSerializer(serializers.Serializer):
+    """
+    Assignment with attributes and puntuation in each attribute for tasks and agents 
+    """
+    agents =  AgentSerializer(many=True, required = True)
+    tasks =  TaskSerializer(many=True, required = True)
+    groups = TaskGroupSerializer(many=True)
+    assign_same_quantity_of_tasks = serializers.BooleanField(required = True)
+    def get_assign_same_quantity_of_tasks(self):
+        return self.validated_data.get('assign_same_quantity_of_tasks')
+    def get_tasks(self):
+        tasks = self.validated_data.get('tasks')
+        return [Task(**task) for task in tasks ]
+    def get_agents(self):
+        agents = self.validated_data.get('agents')
+        return [Agent(**agent) for agent in agents ]
+    def get_groups(self):
+        groups = self.validated_data.get('groups')
+        return [TaskGroup(**group) for group in groups]

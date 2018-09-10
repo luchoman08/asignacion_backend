@@ -4,7 +4,9 @@ import re
 
 class BalancedModelFactory:
     """
-    Balanced model factory and solver
+    Asignacion de tareas donde se busca que el porcentaje de utilizacion de los agentes
+    sea lo mas balanceado posible (el porcentaje de utilizacion es el porcentaje de capacidad 
+    asignado en cada agente con respecto a la capacidad total del agente )
     """
 
     def __init__(self, agents, tasks):
@@ -79,4 +81,51 @@ class AttributeBasedModelFactory:
                 asignaciones_resultado[agent].append(task)
         print(asignaciones_resultado)
         result['assignments'] = asignaciones_resultado
+        return result
+
+
+
+class TaskGroupModelFactory:
+    """
+    Asignacion de tareas basada en agrupamiento de tareas, donde se busca
+    que las asignaciones de cada agente sea lo mas homogenea posible con respecto 
+    a los agrupamientos de las historias, por ejemplo, si se tienen dos agentes (a1, a2), 4 tareas
+    (t1, t2, t3, t4) y dos grupos (g1 = [t1, t2], g2 = [t3, t4] se espera que las asignaciones 
+    a a1 sean en su mayoria, pertenecientes al mismo grupo (sin importar cual) e igual sucede con las asignaciones al
+    agente a2
+    """
+
+    def __init__(self, agents, tasks, groups):
+        """Init task assignment
+        
+        Args:
+            agents: {[list of deserialized Agents]} -- [See AgentSerializer]
+            tasks: {[list of deserialized Task]} -- [See TaskSerializer]
+            groups: {[list of deserialized TaskGroups] -- [See TaskGroupSerializer]}
+        """
+
+        self.agents = agents
+        self.tasks = tasks
+        self.groups = groups
+        self.agents_capacities = {agent.external_id: agent.capacity for agent in self.agents }
+        self.tasks_costs = {task.external_id: task.cost  for task in self.tasks }
+        self.groups_dict = {group.external_id: group.task_ids for group in self.groups}
+    def solve(self):
+        """Solve and returns the result by linear solver of task assignments
+        
+        Returns:
+            [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
+        """
+
+        pulp_status, pulp_variables = resol_genericos.solveTaskGroupingAssignment(self.agents_capacities, self.tasks_costs, self.groups_dict)
+        assignments = {int(agent):[] for agent in self.agents_capacities.keys()}
+        result = {}
+        for variable in pulp_variables:
+            numbers_in_var_name = re.findall(r'\d+', variable.name)
+            if (len(numbers_in_var_name) == 2 and variable.varValue == 1):
+                agent = int(numbers_in_var_name[0])
+                task = int(numbers_in_var_name[1])
+                assignments[agent].append(task)
+        print(assignments)
+        result['assignments'] = assignments
         return result
