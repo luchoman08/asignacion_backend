@@ -1,8 +1,22 @@
 from . import resolventes_genericos as resol_genericos
-import pulp
 import re
+import abc
+import math
+from collections import namedtuple
+class BaseModelFactory:
+    __metaclass__ = abc.ABCMeta
 
-class BalancedModelFactory:
+    @abc.abstractmethod
+    def solve(self):
+        """
+        This method should be use the self properties and return the response of the linear algorithm in
+        a readable format
+        :return:
+        """
+        return
+
+
+class BalancedModelFactory(BaseModelFactory):
     """
     Asignacion de tareas donde se busca que el porcentaje de utilizacion de los agentes
     sea lo mas balanceado posible (el porcentaje de utilizacion es el porcentaje de capacidad 
@@ -44,21 +58,21 @@ class BalancedModelFactory:
         result['assignments'] = assignments
         return result
 
-class AttributeBasedModelFactory:
+
+class AttributeBasedModelFactory(BaseModelFactory):
     """
     Fabrica de modelos donde se tienen en cuenta las habilidades de cada desarrollador (agent ) y
     los costos de cada historia (task) medidos por caracteristicas, podiendo mantener un equilibrio
     entre cantidad de historias asignadas o bien un minimo de historias asignadas a cada desarrollador
     """ 
     def __init__(self, agents, tasks, assign_same_quantity_of_tasks):
-        """[summary]
-        
-        Arguments:
-            agents {[list of Agents]} -- [See AgentWithAttributesSerializer]
+        """Generate a new Attribute based model factory
+
+        Args:
+            agents list of Agents]} -- [See AgentWithAttributesSerializer]
             tasks {[list of Tasks]} -- [See TaskWithAttributesSerializer]
             assign_same_quantity_of_tasks {[boolean]} -- [Say to solver y should include information to intent balance the number of task assigned]
         """
-        print(agents[0].attributes_punctuation)
         self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
         self.tasks = [resol_genericos.Task(task.external_id, {attribute.external_id: attribute.punctuation for attribute in task.attributes_punctuation}) for task in tasks]
         self.assign_same_quantity_of_tasks = assign_same_quantity_of_tasks
@@ -75,7 +89,7 @@ class AttributeBasedModelFactory:
         result = {}
         for variable in pulp_variables:
             numeros_en_nombre_variable = re.findall(r'\d+', variable.name)
-            if (len(numeros_en_nombre_variable) == 2 and variable.varValue == 1):
+            if len(numeros_en_nombre_variable) == 2 and variable.varValue == 1:
                 agent = int(numeros_en_nombre_variable[0])
                 task = int(numeros_en_nombre_variable[1])
                 asignaciones_resultado[agent].append(task)
@@ -84,8 +98,43 @@ class AttributeBasedModelFactory:
         return result
 
 
+class PairAssignmnentFactory(BaseModelFactory):
+    """
+    Asignación de tareas en donde se crea primero un emparejamiento de los desarrolladores y luego con base en dicho
+    emparejamiento, se asignan las tareas por parejas
+    """
+    def __init__(self, agents, tasks, reverse):
+        """
+        Init pair assignment
+        :param agents: list List of Agents
+        :param reverse: bool Should be assigned the tasks
+        """
+        self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
+        self.tasks = [resol_genericos.Task(task.external_id, {attribute.external_id: attribute.punctuation for attribute in task.attributes_punctuation}) for task in tasks]
+        self.reverse = reverse
 
-class TaskGroupModelFactory:
+    def solve(self):
+        """Solve and returns the result by linear solver of task assignments
+
+        Returns:
+            [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
+        """
+
+        pulp_status, pulp_variables = resol_genericos.makePairs(self.agents,
+                                                                self.reverse)
+        Pair = namedtuple('Pair', ['first', 'second'], verbose=True)
+        result = dict()
+        pairs = list()
+        for variable in pulp_variables:
+            numbers_in_var_name = re.findall(r'\d+', variable.name)
+            if len(numbers_in_var_name) == 2 and variable.varValue == 1:
+                agent1 = int(numbers_in_var_name[0])
+                agent2 = int(numbers_in_var_name[1])
+                pairs.append(Pair(agent1, agent2))
+        result['pairs'] = pairs
+        return result
+
+class TaskGroupModelFactory(BaseModelFactory):
     """
     Asignacion de tareas basada en agrupamiento de tareas, donde se busca
     que las asignaciones de cada agente sea lo mas homogenea posible con respecto 
@@ -110,6 +159,7 @@ class TaskGroupModelFactory:
         self.agents_capacities = {agent.external_id: agent.capacity for agent in self.agents }
         self.tasks_costs = {task.external_id: task.cost  for task in self.tasks }
         self.groups_dict = {group.external_id: group.task_ids for group in self.groups}
+
     def solve(self):
         """Solve and returns the result by linear solver of task assignments
         
@@ -122,10 +172,9 @@ class TaskGroupModelFactory:
         result = {}
         for variable in pulp_variables:
             numbers_in_var_name = re.findall(r'\d+', variable.name)
-            if (len(numbers_in_var_name) == 2 and variable.varValue == 1):
+            if len(numbers_in_var_name) == 2 and variable.varValue == 1:
                 agent = int(numbers_in_var_name[0])
                 task = int(numbers_in_var_name[1])
                 assignments[agent].append(task)
-        print(assignments)
         result['assignments'] = assignments
         return result
