@@ -1,8 +1,8 @@
 from . import resolventes_genericos as resol_genericos
+from .resolventes_genericos import Pair, Agent
 import re
 import abc
 import math
-from collections import namedtuple
 class BaseModelFactory:
     __metaclass__ = abc.ABCMeta
 
@@ -45,7 +45,10 @@ class BalancedModelFactory(BaseModelFactory):
             [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
         """
 
-        pulp_status, pulp_variables = resol_genericos.solveEquilibriumProblem(self.agents_capacities, self.tasks_costs)
+        pulp_status, pulp_variables = resol_genericos.iterate_over_assignment(
+            resol_genericos.solveEquilibriumProblem,
+            12,
+            agente_capacidad=self.agents_capacities, tarea_costo=self.tasks_costs)
         assignments = {int(agent):[] for agent in self.agents_capacities.keys()}
         result = {}
         for variable in pulp_variables:
@@ -85,7 +88,7 @@ class AttributeBasedModelFactory(BaseModelFactory):
             [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
         """      
         pulp_status, pulp_variables = resol_genericos.solveAttributesAssignmentProblem(self.environment, assign_same_quantity_of_tasks = self.assign_same_quantity_of_tasks  )
-        asignaciones_resultado = {int(agent.id):[] for agent in self.agents}
+        asignaciones_resultado = {int(agent.id): [] for agent in self.agents}
         result = {}
         for variable in pulp_variables:
             numeros_en_nombre_variable = re.findall(r'\d+', variable.name)
@@ -98,41 +101,97 @@ class AttributeBasedModelFactory(BaseModelFactory):
         return result
 
 
-class PairAssignmnentFactory(BaseModelFactory):
+class PairMakerFactory(BaseModelFactory):
     """
     Asignación de tareas en donde se crea primero un emparejamiento de los desarrolladores y luego con base en dicho
     emparejamiento, se asignan las tareas por parejas
     """
-    def __init__(self, agents, tasks, reverse):
+    def __init__(self, agents, reverse):
         """
         Init pair assignment
-        :param agents: list List of Agents
-        :param reverse: bool Should be assigned the tasks
+        :param agents: list List of AgentSerializer
+        :param reverse: bool Should be assigned the pairs with completely dispair skills?
         """
         self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
-        self.tasks = [resol_genericos.Task(task.external_id, {attribute.external_id: attribute.punctuation for attribute in task.attributes_punctuation}) for task in tasks]
         self.reverse = reverse
 
     def solve(self):
         """Solve and returns the result by linear solver of task assignments
 
-        Returns:
-            [dict{assignments: dict{id_agent: [ids_task_assigned]}] -- [Assignments for agents]
+        :returns: list List of duples where each value of a duple is an agent id
         """
-
         pulp_status, pulp_variables = resol_genericos.makePairs(self.agents,
                                                                 self.reverse)
-        Pair = namedtuple('Pair', ['first', 'second'], verbose=True)
+
         result = dict()
         pairs = list()
         for variable in pulp_variables:
             numbers_in_var_name = re.findall(r'\d+', variable.name)
             if len(numbers_in_var_name) == 2 and variable.varValue == 1:
-                agent1 = int(numbers_in_var_name[0])
-                agent2 = int(numbers_in_var_name[1])
+                agent1 = str(numbers_in_var_name[0])
+                agent2 = str(numbers_in_var_name[1])
                 pairs.append(Pair(agent1, agent2))
+        # Now, we need assign task to pairs, where each pair is see as an agent
         result['pairs'] = pairs
         return result
+
+
+class PairAssignmnentFactory(BaseModelFactory):
+    """
+    Asignación de tareas en donde se crea primero un emparejamiento de los desarrolladores y luego con base en dicho
+    emparejamiento, se asignan las tareas por parejas
+    """
+    def __init__(self, agents, tasks, reverse, assign_same_quantity_of_tasks=False):
+        """
+        Init pair assignment
+        :param agents: list List of AgentSerializer
+        :param reverse: bool Should be assigned the pairs with completely dispair skills?
+        """
+        self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
+        self._ids_skills = self.agents[0].skills.keys()
+
+        if (len(self.agents) % 2) != 0:
+            self.agents.append(Agent.get_little_skillful_agent(self._ids_skills, True))
+
+        self._agents_dict = {agent.id: agent for agent in self.agents}
+        self._agents = agents
+
+        self.tasks = [resol_genericos.Task(task.external_id, {attribute.external_id: attribute.punctuation for attribute in task.attributes_punctuation}) for task in tasks]
+        self.reverse = reverse
+        self.assign_same_quantity_of_tasks = assign_same_quantity_of_tasks
+
+    def solve(self):
+
+        result = PairMakerFactory(self._agents, self.reverse).solve()
+        pairs = result['pairs']
+
+        pairs_dict = dict()
+
+        for i in range(0, len(pairs)):
+            id_agent1 = pairs[i].first
+            id_agent2 = pairs[i].second
+            agent1 = self._agents_dict[id_agent1]
+            agent2 = self._agents_dict[id_agent2]
+            pair = Pair(agent1, agent2)
+            pairs_dict[str(i)] = pair
+        print('pairs dict', pairs_dict)
+        pulp_status, pulp_variables = \
+            resol_genericos.assignToPairs(pairs_dict, self.tasks, self.assign_same_quantity_of_tasks)
+
+        result = dict()
+        asignaciones_resultado = {pair_id: [] for pair_id in pairs_dict.keys()}
+
+        for variable in pulp_variables:
+            numbers_in_var_name = re.findall(r'\d+', variable.name)
+            if len(numbers_in_var_name) == 2 and variable.varValue == 1:
+                pair_id = str(numbers_in_var_name[0])
+                task = str(numbers_in_var_name[1])
+                asignaciones_resultado[pair_id].append(task)
+        # Now, we need assign task to pairs, where each pair is see as an agent
+        result['assignments'] = asignaciones_resultado
+        result['pairs'] = pairs
+        return result
+
 
 class TaskGroupModelFactory(BaseModelFactory):
     """

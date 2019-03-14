@@ -1,0 +1,96 @@
+{"agents": [
+	    {
+	      "external_id": "1",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "5"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "10"
+	        }
+	      ]
+	    },
+	    {
+	      "external_id": "2",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "10"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "5"
+	        }
+	      ]
+	    },
+  	    {
+	      "external_id": "3",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "10"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "5"
+	        }
+	      ]
+	    },
+  	    {
+	      "external_id": "4",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "5"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "10"
+	        }
+	      ]
+	    },
+          {
+	      "external_id": "5",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "10"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "10"
+	        }
+	      ]
+	    }
+	  ],
+	  "tasks": [
+	    {
+	      "external_id": "1",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "5"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "10"
+	        }
+	      ]
+	    },
+	    {
+	      "external_id": "2",
+	      "attributes_punctuation": [
+	        {
+	          "external_id": "0",
+	          "punctuation": "10"
+	        },
+	        {
+	          "external_id": "1",
+	          "punctuation": "5"
+	        }
+	      ]
+	    }
+	  ]
+	}

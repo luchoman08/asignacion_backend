@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics
-from modelamientoAsignaciones import fabricaModelosLineales as fml
+from modelamientoAsignaciones import fabricaModelosLineales as fml, resolventes_genericos as rg
+
+
 
 from .serializers import \
     AssignmentUniqueCostSerializer, \
@@ -60,6 +62,13 @@ class AssignmentWithGroupsView(APIView):
             return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class DefaultAgentId(APIView):
+    """
+    Manage the default agent id used in the software
+    """
+    permission_classes = (AllowAny,)
+    def get(self, reques):
+        return Response({'default_id': rg.Agent.DEFAULT_ID})
 
 class AssignmentByPairs(APIView):
     permission_classes = (AllowAny, )
@@ -72,6 +81,7 @@ class AssignmentByPairs(APIView):
         serializer = AssignmentWithPairsSerializer(data=data)
         if serializer.is_valid():
             resultado_dict = fml.PairAssignmnentFactory(serializer.get_agents(), serializer.get_tasks(), serializer.get_reverse()).solve()
+            print('resultado', resultado_dict)
             return Response(resultado_dict)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -3,8 +3,11 @@ from pulp import *
 from time import time
 import math
 import numbers
+import sys
 from functools import reduce
+from collections import namedtuple
 
+Pair = namedtuple('Pair', ['first', 'second'], verbose=True)
 
 class Task:
 
@@ -12,12 +15,11 @@ class Task:
         self.id = id
         self.costo_caracteristica = costo_caracteristica  # dict
 
-
-costo_caracteristica = {}
+costo_caracteristica = dict()
 costo_caracteristica[1] = 0
 costo_caracteristica[2] = 10
 costo_caracteristica[3] = 0
-costo_caracteristica_ = {}
+costo_caracteristica_ = dict()
 costo_caracteristica_[1] = 10
 costo_caracteristica_[2] = 0
 costo_caracteristica_[3] = 0
@@ -26,15 +28,22 @@ tarea_ = Task(2, costo_caracteristica_)
 
 
 class Agent:
-    DEFAULT_ID = 854554
+    DEFAULT_ID = '11111111111111'
     DEFAULT_SKILL_ID = -1
     MINIMUM_SKILL_VALUE = 1
-    def __init__(self, id, skill):
+
+    def __init__(self, id, skills):
+        """
+        Init Agent
+        :param id: string Unique id for Agent
+        :param skills: dict The keys are the skills id and value is numeric value for the skill
+        """
         self.id = id
-        self.skill = skill  # dict
+        self.skills = skills  # dict
 
     @staticmethod
-    def get_standard_agent(agents):
+    def get_standard_agent(agents, id = None):
+
         """Retorna un agente cuyas skills son la media de un grupo de agentes, debe haber almenos un agente,
         el id de este agente sera DEFAULT_ID
         Args:
@@ -42,31 +51,34 @@ class Agent:
         Returns:
             agent: instance of Agent
         """
-
+        _id = id
+        if not _id:
+            _id = Agent.DEFAULT_ID
         if len(agents) <= 0:
             raise ValueError('Debe ingresar almenos un agente')
         elif len(agents) == 1:
-            return Agent(Agent.DEFAULT_ID, agents[0].skills)
+            return Agent(_id, agents[0].skills)
 
-        id_skills = agents[0].skill.keys()
+        id_skills = agents[0].skills.keys()
         cantidad_agentes = len(agents)
-        skills_media = {id_habilidad: Agent.DEFAULT_SKILL_ID for id_habilidad in id_skills}
+        skills_media = {id_habilidad: None for id_habilidad in id_skills}
         for id_habilidad in id_skills:
             skills_media[id_habilidad] = reduce((lambda x, y: x + y),
                                                 [agent.skills[id_habilidad] for agent in agents]) / float(
                 cantidad_agentes)
-        return Agent(Agent.DEFAULT_ID, skills_media)
+        return Agent(_id, skills_media)
 
     @staticmethod
-    def get_little_skillful_agent(id_skills):
+    def get_little_skillful_agent(id_skills, str_id=False):
         """Retorna un agente con las skills mas bajas posibles
 
         :param id_skills: list of integer
-
+        :param str_id: bool True if the default id should be returned as string format
         :return little_skillful_agent: Agent
         """
         skills = {id_skill: Agent.MINIMUM_SKILL_VALUE for id_skill in id_skills}
-        return Agent(Agent.DEFAULT_ID, skills)
+        agent_id = Agent.DEFAULT_ID if not str_id else str(Agent.DEFAULT_ID)
+        return Agent(agent_id, skills)
 
     @staticmethod
     def get_compatibility(agent1, agent2):
@@ -90,15 +102,15 @@ class Agent:
                                                                                        agent2.skills[id_habilidad])
         return compatibility
 
-skill = dict()
-skill[1] = 10
-skill[2] = 1
-skill[3] = 1
+skills = dict()
+skills[1] = 10
+skills[2] = 1
+skills[3] = 1
 skill_ = dict()
 skill_[1] = 1
 skill_[2] = 10
 skill_[3] = 1
-agent = Agent(1, skill)
+agent = Agent(1, skills)
 agente_ = Agent(2, skill_)
 
 
@@ -122,8 +134,8 @@ class Environment:
         cost = 0
         for id_caracteristica in task.costo_caracteristica.keys():
             # La habilidad caracteristica no puede ser 0 dado que se usa en una división, para este modelo el minimo de habilidad es 0.1, por ende para prevenir errores se normaliza esta propiedad
-            skill_normalizada = agent.skill[id_caracteristica] if isinstance(
-                agent.skill[id_caracteristica], numbers.Number) and agent.skill[
+            skill_normalizada = agent.skills[id_caracteristica] if isinstance(
+                agent.skills[id_caracteristica], numbers.Number) and agent.skills[
                                                                                                             id_caracteristica] != 0 else 0.1
             cost += task.costo_caracteristica[id_caracteristica] * task.costo_caracteristica[
                 id_caracteristica] / skill_normalizada
@@ -167,7 +179,7 @@ class EntornoConGruposHistorias:
         cost = 0
         for id_caracteristica in task.costo_caracteristica.keys():
             cost += task.costo_caracteristica[id_caracteristica] * task.costo_caracteristica[id_caracteristica] / \
-                    agent.skill[id_caracteristica]
+                    agent.skills[id_caracteristica]
         return cost
 
     def costoGrupoTareas(self, id_tareas, agent):
@@ -210,7 +222,7 @@ def solveAttributesAssignmentProblem(environment, assign_same_quantity_of_tasks=
 
 
     """
-    print(environment.agents[1].id, " ", environment.agents[1].skill)
+    print(environment.agents[1].id, " ", environment.agents[1].skills)
     prob = LpProblem("Equilibrio de asignaciones", LpMinimize)
     variables_asignacion = LpVariable.dicts("Asignacion", environment.agents_x_tasks, None, None, LpBinary)
 
@@ -250,9 +262,7 @@ def solveAttributesAssignmentProblem(environment, assign_same_quantity_of_tasks=
 solveAttributesAssignmentProblem(environment, assign_same_quantity_of_tasks=True)
 
 
-def solveEquilibriumProblem(agente_capacidad, tarea_costo):
-    print(agente_capacidad)
-    print(tarea_costo)
+def solveEquilibriumProblem(agente_capacidad, tarea_costo, knowing_minimum=0, knowing_maximum=sys.maxsize, maxtime=sys.maxsize):
     """Resuelve el problema de la asignación garantizando un equilibrio en las cargas asignadas.
 
     Se asignan las tasks de tal forma que se minimize la diferencia de cargas asignadas, en
@@ -261,6 +271,7 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
     Args:
         agente_capacidad (dict of str: int): Identificacion de el agent como llave, la capacidad es el valor.
         tarea_costo (dict of str: int): Identificacion de la task como llave, su cost es el valor.
+        maxtime Tiempo maximo de ejecución de el solver
 
     Returns:
         (status, list): (Estado de el solver pulp, Lista de variables pulp con sus resultados)
@@ -275,7 +286,7 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
     variables_asignacion = LpVariable.dicts("Asignacion", agents_x_tasks, None, None, LpBinary)
     # Variables auxiliares para ayudarse a resolver la desviacin estandard
     aux_vars = LpVariable.dicts("Auxiliar", [(a, "temporal") for a in agents], None, None)
-
+    promedio_porcentaje = LpVariable('promedio_porcentaje', None, None, LpContinuous)
     # Funcion objetivo
 
     def construir_funcion_objetivo(agents):
@@ -299,12 +310,12 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
     porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes = {}
     for agent in agents:
         porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agent] = \
-        porcentaje_uso_tiempo_agentes[agent] - porcentaje_uso_tiempo_agentes[agent] / len(agents)
+        porcentaje_uso_tiempo_agentes[agent] - porcentaje_uso_tiempo_agentes[agent] / float(len(agents))
 
     for agent in agents:
         promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agent] = \
-            (-lpSum([porcentaje_uso_tiempo_agentes[agentex] \
-                     for agentex in agents if agentex != agent]) / len(agents)) + \
+            (-lpSum([porcentaje_uso_tiempo_agentes[agentex]
+                     for agentex in agents if agentex != agent]) / float(len(agents))) + \
             porcentaje_uso_tiempo_agentes_menos_porcentaje_uso_tiempo_agente_dividido_longitud_agentes[agent]
 
     # Restricciones
@@ -323,8 +334,14 @@ def solveEquilibriumProblem(agente_capacidad, tarea_costo):
         prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agent] <= aux_vars[(agent, 'temporal')]
         prob += promedio_porcentaje_uso_tiempo_agentes_exepto_agente[agent] >= - aux_vars[(agent, 'temporal')]
 
+    prob += promedio_porcentaje >= pulp.lpSum(aux_vars)
+    prob += promedio_porcentaje <= pulp.lpSum(aux_vars)
+
+    prob += promedio_porcentaje >= knowing_minimum
+    prob += promedio_porcentaje <= knowing_maximum
+
     tiempo_solve_inicial = time()
-    prob.solve()
+    prob.solve(pulp.PULP_CBC_CMD(maxSeconds=maxtime))
     tiempo_final_solve = time()
     prob.writeLP("EquilibrioConHabilidades.lp")
 
@@ -437,9 +454,8 @@ def makePairs(agents, reverse=False):
     """Retorna una asignacion de parejas, de tal forma sean lo mas compatibles posibles de acuerdo a sus skills, o
         lo mas incompatibles si reverse es True
 
-    :param agents: list Agentes a emparejar
-    :param reverse: int Si es verdadero asigna de tal forma que las parejas sean lo mas imcompatibles posibles de
-        acuerdo a sus skills, default: False
+    :param agents: list Agentes for make the pairs
+    :param reverse: int If true, assign pairs the most distinct than is possible
 
     :returns: (status, list): (Estado de el solver pulp, Lista de variables pulp con sus resultados)
     """
@@ -483,7 +499,6 @@ def makePairs(agents, reverse=False):
         prob += lpSum([pairs_assignment[agent_pair] for agent_pair in agent_pairs if
                        agent_pair[0] == agent_id or agent_pair[1] == agent_id]) == 1
 
-    prob.writeLP("EquilibrioConskills.lp")
     tiempo_solve_inicial = time()
     prob.solve()
     tiempo_final_solve = time()
@@ -497,3 +512,38 @@ def makePairs(agents, reverse=False):
         print(v.name, "=", v.varValue)
     print('El tiempo total de el solve fue:', tiempo_solve)  # En segundos
     return prob.status, prob.variables()
+
+
+def assignToPairs(pairs, tasks, assign_same_quantity_of_tasks=False):
+    """
+    Assign tasks to pairs, by multiple characteristic punctuation
+    :param pairs: dict Keys are the pair id and values are `Pair` instances, first and second
+        values of the values of pairs should be are`Agent` instances
+    :param tasks: list of Task
+    :param assign_same_quantity_of_tasks: bool Try to assign same quantity of tasks to pairs
+    :return: (pulp.Status, pulp.Variables)
+    """
+    pair__agents = list()
+    for pair in pairs.keys():
+        pair__agents.append(Agent.get_standard_agent(list(pairs[pair]), pair))
+    environment = Environment(pair__agents, tasks)
+    return solveAttributesAssignmentProblem(environment, assign_same_quantity_of_tasks)
+
+
+def iterate_over_assignment(assignment_funct, max_iterations=12, **args):
+    """
+    Assign of iterative form
+    :param args:
+    :param assignment_funct:
+    :return:
+    """
+    args['knowing_minimum'] = 0
+    args['knowing_maximum'] = sys.maxsize
+    args['maxtime'] = 16 # in secs
+    vars = None
+    prob_status = pulp.LpStatusNotSolved
+    iterations = 0
+    while pulp.LpStatusOptimal != prob_status and pulp.LpStatusInfeasible != prob_status and iterations <= max_iterations:
+        prob_status, vars = assignment_funct(**args)
+        iterations+=1
+    return prob_status, vars

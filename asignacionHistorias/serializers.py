@@ -7,7 +7,7 @@ Punctuation
 
 
 class AtributePunctuation(serializers.Serializer):
-    external_id = serializers.CharField(required=True) # External id of attribute
+    external_id = serializers.CharField(required=True)  # External id of attribute
     punctuation = serializers.FloatField(required=True)
 
 
