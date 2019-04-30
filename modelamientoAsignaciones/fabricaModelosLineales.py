@@ -106,7 +106,7 @@ class PairMakerFactory(BaseModelFactory):
     Asignación de tareas en donde se crea primero un emparejamiento de los desarrolladores y luego con base en dicho
     emparejamiento, se asignan las tareas por parejas
     """
-    def __init__(self, agents, reverse):
+    def __init__(self, agents, reverse=False):
         """
         Init pair assignment
         :param agents: list List of AgentSerializer
@@ -141,12 +141,13 @@ class PairAssignmnentFactory(BaseModelFactory):
     Asignación de tareas en donde se crea primero un emparejamiento de los desarrolladores y luego con base en dicho
     emparejamiento, se asignan las tareas por parejas
     """
-    def __init__(self, agents, tasks, reverse, assign_same_quantity_of_tasks=False):
+    def __init__(self, agents, tasks, reverse=False, assign_same_quantity_of_tasks=False):
         """
         Init pair assignment
         :param agents: list List of AgentSerializer
         :param reverse: bool Should be assigned the pairs with completely dispair skills?
         """
+        self.external_agents = agents
         self.agents = [resol_genericos.Agent(agent.external_id, {attribute.external_id: attribute.punctuation for attribute in agent.attributes_punctuation}) for agent in agents]
         self._ids_skills = self.agents[0].skills.keys()
 
@@ -161,10 +162,8 @@ class PairAssignmnentFactory(BaseModelFactory):
         self.assign_same_quantity_of_tasks = assign_same_quantity_of_tasks
 
     def solve(self):
-
-        result = PairMakerFactory(self._agents, self.reverse).solve()
-        pairs = result['pairs']
-
+        pairs_result = PairMakerFactory(self.external_agents, self.reverse).solve()
+        pairs = pairs_result['pairs']
         pairs_dict = dict()
 
         for i in range(0, len(pairs)):
@@ -174,7 +173,6 @@ class PairAssignmnentFactory(BaseModelFactory):
             agent2 = self._agents_dict[id_agent2]
             pair = Pair(agent1, agent2)
             pairs_dict[str(i)] = pair
-        print('pairs dict', pairs_dict)
         pulp_status, pulp_variables = \
             resol_genericos.assignToPairs(pairs_dict, self.tasks, self.assign_same_quantity_of_tasks)
 

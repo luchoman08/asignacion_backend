@@ -51,10 +51,25 @@ class TaskGroupSerializer(serializers.Serializer):
     task_ids = serializers.ListField(child=serializers.CharField(required = True), required=True)
 
 
+
+
+
+
 """
 Assignments input
 """
 
+class GeneratePairsSerializer(serializers.Serializer):
+    """
+    Generte pairs based in a list of develoeprs
+    """
+    agents = AgentWithAttributesSerializer(many=True, required=True)
+    reverse = serializers.BooleanField(required=False, default=False)
+    def get_agents(self):
+        agents = self.validated_data.get('agents')
+        return [AgentWithAttributes(**agent) for agent in agents]
+    def get_reverse(self):
+        return self.validated_data.get('reverse')
 
 class AssignmentWithPairsSerializer(serializers.Serializer):
     """

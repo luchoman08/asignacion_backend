@@ -82,6 +82,11 @@ class Agent:
 
     @staticmethod
     def get_compatibility(agent1, agent2):
+        def compatibility_func(habilidad1, habilidad2):
+            max_val = max(habilidad1, habilidad2)
+            if max_val == 0:
+                max_val = 1
+            return min(habilidad1, habilidad2) * 100 / max_val
         """Retorna la compatibilidad del 1 al 100 la cual indica que tan compatibles son dos agentes
 
         :param agent1: Agent
@@ -95,8 +100,6 @@ class Agent:
         id_skills = agent1.skills.keys()
         cantidad_skills = len(id_skills)
         porcentaje_importancia_por_habilidad = 1 / float(cantidad_skills)
-        compatibility_func = lambda habilidad1, habilidad2: min(habilidad1, habilidad2) * 100 / max(habilidad1,
-                                                                                                    habilidad2)
         for id_habilidad in id_skills:
             compatibility += porcentaje_importancia_por_habilidad * compatibility_func(agent1.skills[id_habilidad],
                                                                                        agent2.skills[id_habilidad])
@@ -222,7 +225,6 @@ def solveAttributesAssignmentProblem(environment, assign_same_quantity_of_tasks=
 
 
     """
-    print(environment.agents[1].id, " ", environment.agents[1].skills)
     prob = LpProblem("Equilibrio de asignaciones", LpMinimize)
     variables_asignacion = LpVariable.dicts("Asignacion", environment.agents_x_tasks, None, None, LpBinary)
 

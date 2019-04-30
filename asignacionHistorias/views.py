@@ -8,7 +8,8 @@ from .serializers import \
     AssignmentUniqueCostSerializer, \
     AssignmentWithAttributesSerializer, \
     AssignmentWithGroupsSerializer, \
-    AssignmentWithPairsSerializer
+    AssignmentWithPairsSerializer, \
+    GeneratePairsSerializer
 
 
 from rest_framework.views import APIView
@@ -69,6 +70,23 @@ class DefaultAgentId(APIView):
     permission_classes = (AllowAny,)
     def get(self, reques):
         return Response({'default_id': rg.Agent.DEFAULT_ID})
+
+
+
+class GeneratePairs(APIView):
+    permission_classes = (AllowAny, )
+    @action(methods=['POST'], detail=True)
+    def post(self, request):
+        """
+        Return agent pairs, can be similar in habilities or completely diferent
+        """
+        data = request.data
+        serializer = GeneratePairsSerializer(data=data)
+        if serializer.is_valid():
+            resultado_dict = fml.PairMakerFactory(serializer.get_agents(),  serializer.get_reverse()).solve()
+            print('resultado', resultado_dict)
+            return Response(resultado_dict)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AssignmentByPairs(APIView):
     permission_classes = (AllowAny, )
