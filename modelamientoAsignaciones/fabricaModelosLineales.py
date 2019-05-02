@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from . import resolventes_genericos as resol_genericos
 from .resolventes_genericos import Pair, Agent
 import re

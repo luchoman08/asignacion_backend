@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import itertools, string, re
 from pulp import *
 from time import time
